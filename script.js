@@ -78,6 +78,16 @@ function startGame() {
     return;
   }
 
+  // Check if แม่กำปอง Edition is selected but not yet released
+  const selectedIntensity = document.getElementById("intensitySelect").value;
+  const releaseDate = new Date('2025-05-24');
+  const currentDate = new Date();
+  
+  if (selectedIntensity === 'kampong' && currentDate < releaseDate) {
+    alert("แม่กำปอง Edition จะเปิดให้เล่นในวันที่ 24 พฤษภาคม 2568");
+    return;
+  }
+
   document.getElementById("setupScreen").style.display = "none";
   document.getElementById("gameScreen").style.display = "block";
   currentPlayerIndex = -1; // Reset to start from the first player
@@ -175,6 +185,17 @@ function updateTimerBar(timerBar, timeLeft, totalTime) {
 function chooseType(type) {
   const intensity = document.getElementById("intensitySelect").value;
   const questions = type === 'truth' ? truthQuestions : dareQuestions;
+  
+  // Double check release date for แม่กำปอง Edition
+  if (intensity === 'kampong') {
+    const releaseDate = new Date('2025-05-24');
+    const currentDate = new Date();
+    if (currentDate < releaseDate) {
+      alert("แม่กำปอง Edition จะเปิดให้เล่นในวันที่ 24 พฤษภาคม 2568");
+      return;
+    }
+  }
+  
   const questionList = questions[intensity];
   const randomQuestion = questionList[Math.floor(Math.random() * questionList.length)];
   
