@@ -11,6 +11,7 @@
 <body>
   <!-- Setup Screen -->
   <div class="setup-container" id="setupScreen">
+    <button onclick="goToHub()" class="hub-button">🏠</button>
     <div class="container animate__animated animate__fadeIn">
       <div class="title-container">
         <h1 class="game-title">Truth or Dare</h1>
@@ -23,8 +24,14 @@
         <button onclick="addPlayer()">➕ เพิ่มผู้เล่น</button>
       </div>
 
-      <div class="player-list" id="players">
-        <strong>ผู้เล่น:</strong> <em>ยังไม่มี</em>
+      <div class="player-list-container">
+        <div class="player-list-header">
+          <strong>ผู้เล่น</strong>
+          <button onclick="toggleEditMode()" id="editModeBtn" class="edit-button">✏️ จัดตำแหน่ง</button>
+        </div>
+        <div id="players" class="player-list">
+          <ul id="playerOrderList"></ul>
+        </div>
       </div>
 
       <div class="input-group">
@@ -47,7 +54,7 @@
         </select>
       </div>
 
-      <button onclick="startGame()" class="start-button">🎲 เริ่มเกม</button>
+      <button onclick="startGame()" class="start-button">เริ่มเกม</button>
     </div>
   </div>
 

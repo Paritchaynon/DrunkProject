@@ -1,6 +1,8 @@
 const players = [];
 let currentPlayer = '';
+let currentPlayerIndex = -1;
 let timerInterval = null;
+let isEditMode = false;
 
 function addPlayer() {
   const input = document.getElementById("playerInput");
@@ -13,8 +15,61 @@ function addPlayer() {
 }
 
 function updatePlayerList() {
-  const listDiv = document.getElementById("players");
-  listDiv.innerHTML = "<strong>ผู้เล่น:</strong> " + players.join(", ");
+  const listElement = document.getElementById("playerOrderList");
+  listElement.innerHTML = "";
+  
+  players.forEach((player, index) => {
+    const li = document.createElement("li");
+    li.className = "player-item";
+    if (isEditMode) {
+      li.draggable = true;
+      li.innerHTML = `
+        <span class="drag-handle">⋮⋮</span>
+        <span class="player-name">${player}</span>
+        <button class="delete-btn" onclick="removePlayer(${index})">❌</button>
+      `;
+      
+      li.addEventListener("dragstart", (e) => {
+        e.dataTransfer.setData("text/plain", index);
+        li.classList.add("dragging");
+      });
+      
+      li.addEventListener("dragend", () => {
+        li.classList.remove("dragging");
+      });
+      
+      li.addEventListener("dragover", (e) => {
+        e.preventDefault();
+      });
+      
+      li.addEventListener("drop", (e) => {
+        e.preventDefault();
+        const fromIndex = parseInt(e.dataTransfer.getData("text/plain"));
+        const toIndex = index;
+        
+        if (fromIndex !== toIndex) {
+          const [movedPlayer] = players.splice(fromIndex, 1);
+          players.splice(toIndex, 0, movedPlayer);
+          updatePlayerList();
+        }
+      });
+    } else {
+      li.innerHTML = `<span class="player-name">${player}</span>`;
+    }
+    listElement.appendChild(li);
+  });
+}
+
+function removePlayer(index) {
+  players.splice(index, 1);
+  updatePlayerList();
+}
+
+function toggleEditMode() {
+  isEditMode = !isEditMode;
+  const editBtn = document.getElementById("editModeBtn");
+  editBtn.textContent = isEditMode ? "✅ เสร็จสิ้น" : "✏️ จัดตำแหน่ง";
+  updatePlayerList();
 }
 
 function startGame() {
@@ -25,6 +80,7 @@ function startGame() {
 
   document.getElementById("setupScreen").style.display = "none";
   document.getElementById("gameScreen").style.display = "block";
+  currentPlayerIndex = -1; // Reset to start from the first player
   nextPlayer();
 }
 
@@ -34,6 +90,7 @@ function backToMenu() {
     timerInterval = null;
   }
   
+  currentPlayerIndex = -1; // Reset player index when going back to menu
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("setupScreen").style.display = "block";
   document.getElementById("timerArea").style.display = "none";
@@ -47,10 +104,12 @@ function nextPlayer() {
     timerInterval = null;
   }
   
-  currentPlayer = players[Math.floor(Math.random() * players.length)];
+  // Move to next player in sequence
+  currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+  currentPlayer = players[currentPlayerIndex];
   
   const playerNameElement = document.getElementById("playerName");
-  playerNameElement.innerHTML = `<span>${currentPlayer}</span>`;
+  playerNameElement.innerHTML = `<span class="current-player-name">${currentPlayer}</span>`;
   
   document.getElementById("choiceArea").style.display = "block";
   document.getElementById("questionArea").style.display = "none";
@@ -130,4 +189,19 @@ function chooseType(type) {
   
   const timerDuration = parseInt(document.getElementById("timerSelect").value);
   startTimer(timerDuration);
+}
+
+function goToHub() {
+  // Clear any ongoing timers
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+  
+  // Reset game state
+  currentPlayerIndex = -1;
+  players.length = 0;
+  
+  // Navigate to the hub page
+  window.location.href = '../index.html';
 } 
