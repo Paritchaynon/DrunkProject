@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Truth or Dare - วงเหล้า</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Setup Screen -->
+  <div class="setup-container" id="setupScreen">
+    <div class="container animate__animated animate__fadeIn">
+      <div class="title-container">
+        <h1 class="game-title">Truth or Dare</h1>
+        <div class="game-subtitle">วงเหล้า Edition</div>
+      </div>
+      
+      <div class="input-group">
+        <label>เพิ่มชื่อผู้เล่น:</label>
+        <input type="text" id="playerInput" placeholder="เช่น ตูน, ก้อย" autocomplete="off">
+        <button onclick="addPlayer()">➕ เพิ่มผู้เล่น</button>
+      </div>
+
+      <div class="player-list" id="players">
+        <strong>ผู้เล่น:</strong> <em>ยังไม่มี</em>
+      </div>
+
+      <div class="input-group">
+        <label>เลือกระดับความรุนแรงของคำถาม:</label>
+        <select id="intensitySelect">
+          <option value="mild">😇 เบา</option>
+          <option value="medium">😈 ปานกลาง</option>
+          <option value="extreme">🔥 แรง</option>
+        </select>
+      </div>
+
+      <div class="input-group">
+        <label>เวลาในการทำภารกิจ (วินาที):</label>
+        <select id="timerSelect">
+          <option value="0">ไม่จำกัดเวลา</option>
+          <option value="30">30 วินาที</option>
+          <option value="60">1 นาที</option>
+          <option value="120">2 นาที</option>
+          <option value="300">5 นาที</option>
+        </select>
+      </div>
+
+      <button onclick="startGame()" class="start-button">🎲 เริ่มเกม</button>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div class="game-container" id="gameScreen">
+    <div class="game-content">
+      <button id="menuButton" onclick="backToMenu()" class="menu-button">↩️ เมนู</button>
+      <div class="player-name" id="playerName"></div>
+      
+      <div id="choiceArea">
+        <div class="choice-buttons">
+          <button onclick="chooseType('truth')" class="choice-btn truth-btn animate__animated animate__pulse">🤔 Truth</button>
+          <button onclick="chooseType('dare')" class="choice-btn dare-btn animate__animated animate__pulse">😈 Dare</button>
+        </div>
+      </div>
+
+      <div id="questionArea" style="display:none;" class="question-display animate__animated animate__fadeIn"></div>
+      <div id="timerArea" style="display:none;" class="timer-display"></div>
+      <button onclick="nextPlayer()" id="nextButton" style="display:none;" class="animate__animated animate__pulse">➡️ ผู้เล่นถัดไป</button>
+    </div>
+  </div>
+
+  <!-- Import JavaScript files -->
+  <script src="questions/truth.js"></script>
+  <script src="questions/dare.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
