@@ -203,5 +203,5 @@ function goToHub() {
   players.length = 0;
   
   // Navigate to the hub page
-  window.location.href = '../index.html';
+  window.location.href = 'DrunkProject/index.html';
 } 
