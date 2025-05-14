@@ -188,11 +188,51 @@ function chooseType(type) {
   
   // Double check release date for แม่กำปอง Edition
   if (intensity === 'kampong') {
-    const releaseDate = new Date('2025-05-24');
+    const releaseDate = new Date('2025-05-24'); // This will typically parse as YYYY-MM-DD local time midnight
     const currentDate = new Date();
-    if (currentDate < releaseDate) {
-      alert("แม่กำปอง Edition จะเปิดให้เล่นในวันที่ 24 พฤษภาคม 2568");
-      return;
+
+    // For a more robust date comparison, ensure we are comparing dates only (not times)
+    // Set releaseDate to the very start of that day.
+    releaseDate.setHours(0, 0, 0, 0);
+    // Create a comparable current date (start of today)
+    const today = new Date();
+    today.setHours(0,0,0,0);
+
+    if (today < releaseDate) {
+      const questionArea = document.getElementById("questionArea");
+      const choiceArea = document.getElementById("choiceArea");
+      const nextButton = document.getElementById("nextButton");
+      const timerArea = document.getElementById("timerArea");
+
+      // Hide choice buttons area
+      if (choiceArea) {
+        choiceArea.style.display = "none";
+      }
+      
+      // Display message in question area
+      if (questionArea) {
+        // Using var(--warning-color) from styles.css for the heading
+        questionArea.innerHTML = `
+          <div style="padding: 20px; text-align: center;">
+            <h3 style="color: var(--warning-color); margin-bottom: 10px; font-size: 1.5em;">🔒 เนื้อหาถูกล็อค</h3>
+            <p style="font-size: 1.1em;"><strong>แม่กำปอง Edition</strong> จะเปิดให้เล่นในวันที่ 24 พฤษภาคม 2568</p>
+            <p style="font-size: 0.9em; margin-top: 15px; color: #555;">กรุณาเลือกโหมดความรุนแรงอื่น หรือกลับไปที่เมนูหลักโดยใช้ปุ่ม '↩️ เมนู' ด้านบน</p>
+          </div>
+        `;
+        questionArea.style.display = "block";
+      }
+      
+      // Ensure next button is hidden (it would normally be shown after this block)
+      if (nextButton) {
+        nextButton.style.display = "none";
+      }
+      
+      // Ensure timer area is hidden (timer would normally start after this block)
+      if (timerArea) {
+        timerArea.style.display = "none";
+      }
+      
+      return; // Stop further processing for this choice
     }
   }
   
