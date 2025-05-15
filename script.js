@@ -14,6 +14,17 @@ function addPlayer() {
   }
 }
 
+// Add event listener for enter key
+document.addEventListener('DOMContentLoaded', function() {
+  const playerInput = document.getElementById("playerInput");
+  playerInput.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      addPlayer();
+    }
+  });
+});
+
 function updatePlayerList() {
   const listElement = document.getElementById("playerOrderList");
   listElement.innerHTML = "";
@@ -29,6 +40,7 @@ function updatePlayerList() {
         <button class="delete-btn" onclick="removePlayer(${index})">❌</button>
       `;
       
+      // Mouse drag events
       li.addEventListener("dragstart", (e) => {
         e.dataTransfer.setData("text/plain", index);
         li.classList.add("dragging");
@@ -53,6 +65,121 @@ function updatePlayerList() {
           updatePlayerList();
         }
       });
+
+      // Touch events for mobile
+      let touchStartY = 0;
+      let touchStartIndex = -1;
+      let currentTouchY = 0;
+      let isDragging = false;
+      let targetIndex = -1;
+      let initialY = 0;
+      let currentY = 0;
+      
+      li.addEventListener("touchstart", (e) => {
+        const touch = e.touches[0];
+        touchStartY = touch.clientY;
+        touchStartIndex = index;
+        targetIndex = index;
+        isDragging = true;
+        initialY = touch.clientY;
+        
+        // Get initial position of the element
+        const rect = li.getBoundingClientRect();
+        li.style.position = 'fixed';
+        li.style.width = rect.width + 'px';
+        li.style.left = rect.left + 'px';
+        li.style.top = rect.top + 'px';
+        li.style.zIndex = '1000';
+        li.classList.add("dragging");
+        
+        // Create placeholder
+        const placeholder = document.createElement('li');
+        placeholder.className = 'player-item placeholder';
+        placeholder.style.visibility = 'hidden';
+        li.parentNode.insertBefore(placeholder, li);
+        
+        e.preventDefault();
+      }, { passive: false });
+
+      li.addEventListener("touchmove", (e) => {
+        if (!isDragging) return;
+        
+        const touch = e.touches[0];
+        currentY = touch.clientY;
+        const deltaY = currentY - initialY;
+        
+        // Move the dragged element
+        li.style.transform = `translateY(${deltaY}px)`;
+        
+        // Find potential drop target
+        const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+        const hoverItem = elements.find(el => 
+          el.classList.contains("player-item") && 
+          !el.classList.contains("dragging") &&
+          !el.classList.contains("placeholder")
+        );
+        
+        if (hoverItem) {
+          const hoverIndex = Array.from(listElement.children).indexOf(hoverItem);
+          if (hoverIndex !== targetIndex) {
+            // Move placeholder
+            const placeholder = listElement.querySelector('.placeholder');
+            if (hoverIndex > targetIndex) {
+              hoverItem.parentNode.insertBefore(placeholder, hoverItem.nextSibling);
+            } else {
+              hoverItem.parentNode.insertBefore(placeholder, hoverItem);
+            }
+            targetIndex = hoverIndex;
+          }
+        }
+        
+        e.preventDefault();
+      }, { passive: false });
+
+      li.addEventListener("touchend", () => {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        li.style.position = '';
+        li.style.width = '';
+        li.style.left = '';
+        li.style.top = '';
+        li.style.zIndex = '';
+        li.style.transform = '';
+        li.classList.remove("dragging");
+        
+        // Remove placeholder and update array
+        const placeholder = listElement.querySelector('.placeholder');
+        if (placeholder) {
+          placeholder.remove();
+        }
+        
+        if (targetIndex !== touchStartIndex) {
+          const [movedPlayer] = players.splice(touchStartIndex, 1);
+          players.splice(targetIndex, 0, movedPlayer);
+          updatePlayerList();
+        }
+      });
+
+      li.addEventListener("touchcancel", () => {
+        isDragging = false;
+        li.style.position = '';
+        li.style.width = '';
+        li.style.left = '';
+        li.style.top = '';
+        li.style.zIndex = '';
+        li.style.transform = '';
+        li.classList.remove("dragging");
+        
+        // Remove placeholder
+        const placeholder = listElement.querySelector('.placeholder');
+        if (placeholder) {
+          placeholder.remove();
+        }
+        
+        updatePlayerList();
+      });
+      
     } else {
       li.innerHTML = `<span class="player-name">${player}</span>`;
     }
@@ -114,6 +241,16 @@ function nextPlayer() {
     timerInterval = null;
   }
   
+  // Reset all warning states and animations
+  const timerArea = document.getElementById("timerArea");
+  
+  // Remove warning classes and reset styles
+  timerArea.classList.remove("timer-warning", "times-up");
+  
+  // Clear any existing timer elements
+  timerArea.innerHTML = '';
+  timerArea.style.display = "none";
+  
   // Move to next player in sequence
   currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
   currentPlayer = players[currentPlayerIndex];
@@ -121,9 +258,9 @@ function nextPlayer() {
   const playerNameElement = document.getElementById("playerName");
   playerNameElement.innerHTML = `<span class="current-player-name">${currentPlayer}</span>`;
   
+  // Reset display states
   document.getElementById("choiceArea").style.display = "block";
   document.getElementById("questionArea").style.display = "none";
-  document.getElementById("timerArea").style.display = "none";
   document.getElementById("nextButton").style.display = "none";
 }
 
@@ -135,8 +272,7 @@ function startTimer(duration) {
   
   timerArea.innerHTML = '<div class="timer-bar"></div>';
   timerArea.style.display = "block";
-  timerArea.classList.remove("timer-warning");
-  gameContainer.classList.remove("time-warning", "time-urgent");
+  timerArea.classList.remove("timer-warning", "times-up");
   
   const timerBar = timerArea.querySelector(".timer-bar");
   let timeLeft = duration;
@@ -152,34 +288,43 @@ function startTimer(duration) {
     timeLeft--;
     updateTimerBar(timerBar, timeLeft, totalTime);
     
-    // Warning states
+    // Warning states with just timer bar color change
     const warningThreshold = Math.min(10, totalTime * 0.3); // 30% of time or 10 seconds
-    const urgentThreshold = Math.min(5, totalTime * 0.15); // 15% of time or 5 seconds
     
-    if (timeLeft <= urgentThreshold) {
+    if (timeLeft <= warningThreshold) {
       timerArea.classList.add("timer-warning");
-      gameContainer.classList.remove("time-warning");
-      gameContainer.classList.add("time-urgent");
-    } else if (timeLeft <= warningThreshold) {
-      timerArea.classList.add("timer-warning");
-      gameContainer.classList.add("time-warning");
-      gameContainer.classList.remove("time-urgent");
     }
     
     if (timeLeft <= 0) {
       clearInterval(timerInterval);
       timerInterval = null;
+      
+      // Animate the time's up state
+      timerArea.classList.add("times-up");
       timerBar.style.width = '0%';
-      timerArea.innerHTML = '<div class="timer-bar" style="width: 0%"></div><div class="times-up">⏰ หมดเวลา!</div>';
-      // Keep the warning state active
-      gameContainer.classList.add("time-urgent");
+      
+      // Create and animate the times up message
+      const timesUpMessage = document.createElement('div');
+      timesUpMessage.className = 'times-up-message animate__animated animate__bounceIn';
+      timesUpMessage.innerHTML = `
+        <div class="times-up-icon">⏰</div>
+        <div class="times-up-text">หมดเวลา!</div>
+      `;
+      timerArea.appendChild(timesUpMessage);
+      
+      // Vibrate on mobile devices if supported
+      if (navigator.vibrate) {
+        navigator.vibrate([200, 100, 200]);
+      }
     }
   }, 1000);
 }
 
 function updateTimerBar(timerBar, timeLeft, totalTime) {
   const percentage = (timeLeft / totalTime) * 100;
-  timerBar.style.width = `${percentage}%`;
+  requestAnimationFrame(() => {
+    timerBar.style.width = `${percentage}%`;
+  });
 }
 
 function chooseType(type) {
