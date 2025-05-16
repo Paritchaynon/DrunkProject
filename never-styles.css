@@ -34,6 +34,7 @@ body {
   margin: 0 auto;
   padding: 20px;
   min-height: 100vh;
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -278,10 +279,13 @@ button:active {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: none !important;
+  position: fixed !important;
+  margin: 0 !important;
 }
 
 .hub-button:hover {
-  transform: translateY(-2px);
+  transform: translateY(-2px) !important;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
 }
 
@@ -396,14 +400,8 @@ button:active {
 }
 
 .copyright {
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.8rem;
-  color: #666;
   text-align: center;
-  width: 100%;
-  padding: 10px;
-  z-index: 1000;
-} 
+  padding: 20px;
+  color: #666;
+  font-size: 0.9em;
+}

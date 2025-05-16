@@ -18,17 +18,169 @@ const currentIntensityDisplay = document.getElementById('currentIntensity');
 const nextButton = document.getElementById('nextButton');
 const questionArea = document.getElementById('questionArea');
 
-// Initialize drag and drop
-function initializeDragAndDrop() {
+function updatePlayerList() {
   if (playerOrderList) {
-    new Sortable(playerOrderList, {
-      animation: 150,
-      handle: '.drag-handle',
-      disabled: !isEditMode,
-      onEnd: function() {
-        // Update players array after drag
-        players = Array.from(playerOrderList.children).map(li => li.dataset.player);
+    // Clear the list first
+    playerOrderList.innerHTML = '';
+    
+    // Create and append each player item
+    players.forEach((player, index) => {
+      const li = document.createElement('li');
+      li.className = 'player-item';
+      
+      if (isEditMode) {
+        li.draggable = true;
+        li.innerHTML = `
+          <span class="drag-handle">⋮⋮</span>
+          <span class="player-name">${player}</span>
+          <button class="delete-btn" onclick="removePlayer(${index})">❌</button>
+        `;
+        
+        // Mouse drag events
+        li.addEventListener('dragstart', (e) => {
+          e.dataTransfer.setData('text/plain', index);
+          li.classList.add('dragging');
+        });
+        
+        li.addEventListener('dragend', () => {
+          li.classList.remove('dragging');
+        });
+        
+        li.addEventListener('dragover', (e) => {
+          e.preventDefault();
+        });
+        
+        li.addEventListener('drop', (e) => {
+          e.preventDefault();
+          const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
+          const toIndex = index;
+          
+          if (fromIndex !== toIndex) {
+            const [movedPlayer] = players.splice(fromIndex, 1);
+            players.splice(toIndex, 0, movedPlayer);
+            updatePlayerList();
+          }
+        });
+
+        // Touch events for mobile
+        let touchStartY = 0;
+        let touchStartIndex = -1;
+        let currentTouchY = 0;
+        let isDragging = false;
+        let targetIndex = -1;
+        let initialY = 0;
+        let currentY = 0;
+        
+        li.addEventListener('touchstart', (e) => {
+          const touch = e.touches[0];
+          touchStartY = touch.clientY;
+          touchStartIndex = index;
+          targetIndex = index;
+          isDragging = true;
+          initialY = touch.clientY;
+          
+          // Get initial position of the element
+          const rect = li.getBoundingClientRect();
+          li.style.position = 'fixed';
+          li.style.width = rect.width + 'px';
+          li.style.left = rect.left + 'px';
+          li.style.top = rect.top + 'px';
+          li.style.zIndex = '1000';
+          li.classList.add('dragging');
+          
+          // Create placeholder
+          const placeholder = document.createElement('li');
+          placeholder.className = 'player-item placeholder';
+          placeholder.style.visibility = 'hidden';
+          li.parentNode.insertBefore(placeholder, li);
+          
+          e.preventDefault();
+        }, { passive: false });
+
+        li.addEventListener('touchmove', (e) => {
+          if (!isDragging) return;
+          
+          const touch = e.touches[0];
+          currentY = touch.clientY;
+          const deltaY = currentY - initialY;
+          
+          // Move the dragged element
+          li.style.transform = `translateY(${deltaY}px)`;
+          
+          // Find potential drop target
+          const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
+          const hoverItem = elements.find(el => 
+            el.classList.contains('player-item') && 
+            !el.classList.contains('dragging') &&
+            !el.classList.contains('placeholder')
+          );
+          
+          if (hoverItem) {
+            const hoverIndex = Array.from(playerOrderList.children).indexOf(hoverItem);
+            if (hoverIndex !== targetIndex) {
+              // Move placeholder
+              const placeholder = playerOrderList.querySelector('.placeholder');
+              if (hoverIndex > targetIndex) {
+                hoverItem.parentNode.insertBefore(placeholder, hoverItem.nextSibling);
+              } else {
+                hoverItem.parentNode.insertBefore(placeholder, hoverItem);
+              }
+              targetIndex = hoverIndex;
+            }
+          }
+          
+          e.preventDefault();
+        }, { passive: false });
+
+        li.addEventListener('touchend', () => {
+          if (!isDragging) return;
+          
+          isDragging = false;
+          li.style.position = '';
+          li.style.width = '';
+          li.style.left = '';
+          li.style.top = '';
+          li.style.zIndex = '';
+          li.style.transform = '';
+          li.classList.remove('dragging');
+          
+          // Remove placeholder and update array
+          const placeholder = playerOrderList.querySelector('.placeholder');
+          if (placeholder) {
+            placeholder.remove();
+          }
+          
+          if (targetIndex !== touchStartIndex) {
+            const [movedPlayer] = players.splice(touchStartIndex, 1);
+            players.splice(targetIndex, 0, movedPlayer);
+            updatePlayerList();
+          }
+        });
+
+        li.addEventListener('touchcancel', () => {
+          isDragging = false;
+          li.style.position = '';
+          li.style.width = '';
+          li.style.left = '';
+          li.style.top = '';
+          li.style.zIndex = '';
+          li.style.transform = '';
+          li.classList.remove('dragging');
+          
+          // Remove placeholder
+          const placeholder = playerOrderList.querySelector('.placeholder');
+          if (placeholder) {
+            placeholder.remove();
+          }
+          
+          updatePlayerList();
+        });
+      } else {
+        li.innerHTML = `<span class="player-name">${player}</span>`;
       }
+      
+      // Append the li element to the list
+      playerOrderList.appendChild(li);
     });
   }
 }
@@ -48,32 +200,11 @@ function removePlayer(index) {
   updatePlayerList();
 }
 
-function updatePlayerList() {
-  if (playerOrderList) {
-    playerOrderList.innerHTML = players.map((player, index) => `
-      <li class="player-item" data-player="${player}">
-        ${isEditMode ? '<span class="drag-handle">↕️</span>' : ''}
-        <span class="player-name">${player}</span>
-        ${isEditMode ? `<button class="delete-btn" onclick="removePlayer(${index})">❌</button>` : ''}
-      </li>
-    `).join('');
-    
-    // Reinitialize drag and drop after updating list
-    initializeDragAndDrop();
-  }
-}
-
 function toggleEditMode() {
   isEditMode = !isEditMode;
   const editBtn = document.getElementById('editModeBtn');
   editBtn.textContent = isEditMode ? '✅ เสร็จสิ้น' : '✏️ จัดตำแหน่ง';
   updatePlayerList();
-  
-  // Update Sortable instance
-  const sortableInstance = Sortable.get(playerOrderList);
-  if (sortableInstance) {
-    sortableInstance.option("disabled", !isEditMode);
-  }
 }
 
 // Game Logic
@@ -83,6 +214,7 @@ function startGame() {
     return;
   }
   
+  document.querySelector('.hub-button').style.display = 'none';
   currentPlayerIndex = 0;
   currentIntensity = intensitySelect.value;
   setupScreen.style.display = 'none';
@@ -176,6 +308,7 @@ function updateIntensityDisplay() {
 }
 
 function backToMenu() {
+  document.querySelector('.hub-button').style.display = 'flex';
   gameScreen.style.display = 'none';
   setupScreen.style.display = 'flex';
   usedQuestions.clear();
@@ -197,5 +330,5 @@ playerInput.addEventListener('keypress', (e) => {
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
   gameScreen.style.display = 'none';
-  initializeDragAndDrop();
+  updatePlayerList();
 }); 

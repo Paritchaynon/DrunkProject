@@ -215,6 +215,7 @@ function startGame() {
     return;
   }
 
+  document.querySelector('.hub-button').style.display = 'none';
   document.getElementById("setupScreen").style.display = "none";
   document.getElementById("gameScreen").style.display = "block";
   currentPlayerIndex = -1; // Reset to start from the first player
@@ -227,6 +228,7 @@ function backToMenu() {
     timerInterval = null;
   }
   
+  document.querySelector('.hub-button').style.display = 'flex';
   currentPlayerIndex = -1; // Reset player index when going back to menu
   document.getElementById("gameScreen").style.display = "none";
   document.getElementById("setupScreen").style.display = "block";

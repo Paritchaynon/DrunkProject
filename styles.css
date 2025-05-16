@@ -405,6 +405,9 @@ h1 {
   align-items: center;
   justify-content: center;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transform: none !important;
+  position: fixed !important;
+  margin: 0 !important;
 }
 
 .hub-button:hover {
@@ -732,6 +735,13 @@ h1 {
 .top-buttons button:hover {
   background-color: rgba(0, 0, 0, 0.2);
   transform: translateY(-2px);
+}
+
+.copyright {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 0.9em;
 }
 
 /* Landscape orientation */

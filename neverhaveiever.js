@@ -11,19 +11,22 @@ function goToHub() {
 }
 
 function startGame() {
+    document.querySelector('.hub-button').style.display = 'none';
+    setupScreen.style.display = 'none';
+    gameScreen.style.display = 'block';
     currentIntensity = document.getElementById('intensitySelect').value;
     statements = [...neverQuestions[currentIntensity]];
     shuffleArray(statements);
     
-    document.getElementById('setupScreen').style.display = 'none';
-    document.getElementById('gameScreen').style.display = 'flex';
     updateIntensityButton();
     updateGameDisplay();
+    nextQuestion();
 }
 
 function backToMenu() {
-    document.getElementById('gameScreen').style.display = 'none';
-    document.getElementById('setupScreen').style.display = 'flex';
+    document.querySelector('.hub-button').style.display = 'flex';
+    gameScreen.style.display = 'none';
+    setupScreen.style.display = 'flex';
 }
 
 function changeIntensity() {
