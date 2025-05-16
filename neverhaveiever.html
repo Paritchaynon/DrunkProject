@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Never Have I Ever - วงเหล้า</title>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="never-styles.css">
+</head>
+<body>
+  <!-- Setup Screen -->
+  <div class="setup-container" id="setupScreen">
+    <button onclick="goToHub()" class="hub-button">🏠</button>
+    <div class="container animate__animated animate__fadeIn">
+      <div class="title-container">
+        <h1 class="game-title">Never Have I Ever</h1>
+        <div class="game-subtitle">วงเหล้า Edition</div>
+      </div>
+
+      <div class="input-group">
+        <label>เลือกระดับความรุนแรงของคำถาม:</label>
+        <select id="intensitySelect">
+          <option value="mild">😇 เบา</option>
+          <option value="medium">😈 ปานกลาง</option>
+          <option value="extreme">🔥 แรง</option>
+        </select>
+      </div>
+
+      <div class="game-rules">
+        <h3>📜 กติกา</h3>
+        <ul>
+          <li>🎯 ผู้เล่นจะได้อ่านประโยคที่ขึ้นมา</li>
+          <li>🍺 ถ้าใครเคยทำสิ่งนั้น ต้องดื่ม!</li>
+          <li>🤔 ถ้าอยากเล่าเรื่องราวเพิ่มเติมก็ได้</li>
+          <li>😅 ยิ่งดื่ม ยิ่งสนุก!</li>
+        </ul>
+      </div>
+
+      <button onclick="startGame()" class="start-button animate__animated animate__pulse animate__infinite">เริ่มเกม</button>
+    </div>
+  </div>
+
+  <!-- Game Screen -->
+  <div class="game-container" id="gameScreen">
+    <div class="game-content">
+      <div class="top-buttons">
+        <button onclick="backToMenu()" class="menu-button">↩️ เมนู</button>
+        <button onclick="changeIntensity()" class="intensity-button" id="currentIntensity">😇 เบา</button>
+      </div>
+
+      <div class="question-display animate__animated animate__fadeIn">
+        <div class="statement-text">ฉันไม่เคย...</div>
+        <div id="neverStatement" class="never-statement animate__animated"></div>
+      </div>
+
+      <button onclick="nextQuestion()" class="next-button animate__animated animate__pulse animate__infinite">
+        ➡️ คำถามถัดไป
+      </button>
+    </div>
+  </div>
+
+  <!-- Import JavaScript files -->
+  <script src="questions/never.js"></script>
+  <script src="neverhaveiever.js"></script>
+  <div class="copyright">© 2024 Paritchayanon</div>
+</body>
+</html> 
