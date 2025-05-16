@@ -33,11 +33,24 @@ function updatePlayerList() {
         li.innerHTML = `
           <span class="drag-handle">⋮⋮</span>
           <span class="player-name">${player}</span>
-          <button class="delete-btn" onclick="removePlayer(${index})">❌</button>
+          <button type="button" class="delete-btn" data-index="${index}">❌</button>
         `;
+
+        // Handle delete button click
+        const deleteBtn = li.querySelector('.delete-btn');
+        deleteBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          removePlayer(index);
+        });
         
         // Mouse drag events
         li.addEventListener('dragstart', (e) => {
+          // Don't start drag if clicking delete button
+          if (e.target.closest('.delete-btn')) {
+            e.preventDefault();
+            return;
+          }
           e.dataTransfer.setData('text/plain', index);
           li.classList.add('dragging');
         });
@@ -64,20 +77,26 @@ function updatePlayerList() {
 
         // Touch events for mobile
         let touchStartY = 0;
+        let touchStartX = 0;
         let touchStartIndex = -1;
-        let currentTouchY = 0;
         let isDragging = false;
         let targetIndex = -1;
         let initialY = 0;
         let currentY = 0;
+        let touchStartTime = 0;
         
         li.addEventListener('touchstart', (e) => {
+          // Don't start drag if touching delete button
+          if (e.target.closest('.delete-btn')) {
+            return;
+          }
+
+          touchStartTime = Date.now();
           const touch = e.touches[0];
           touchStartY = touch.clientY;
+          touchStartX = touch.clientX;
           touchStartIndex = index;
           targetIndex = index;
-          isDragging = true;
-          initialY = touch.clientY;
           
           // Get initial position of the element
           const rect = li.getBoundingClientRect();
@@ -86,7 +105,6 @@ function updatePlayerList() {
           li.style.left = rect.left + 'px';
           li.style.top = rect.top + 'px';
           li.style.zIndex = '1000';
-          li.classList.add('dragging');
           
           // Create placeholder
           const placeholder = document.createElement('li');
@@ -98,14 +116,26 @@ function updatePlayerList() {
         }, { passive: false });
 
         li.addEventListener('touchmove', (e) => {
-          if (!isDragging) return;
+          if (e.target.closest('.delete-btn')) return;
           
           const touch = e.touches[0];
+          const deltaX = touch.clientX - touchStartX;
+          const deltaY = touch.clientY - touchStartY;
+          
+          // Only start dragging if moved more than 10px vertically
+          if (!isDragging && Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
+            isDragging = true;
+            initialY = touch.clientY;
+            li.classList.add('dragging');
+          }
+          
+          if (!isDragging) return;
+          
           currentY = touch.clientY;
-          const deltaY = currentY - initialY;
+          const moveY = currentY - initialY;
           
           // Move the dragged element
-          li.style.transform = `translateY(${deltaY}px)`;
+          li.style.transform = `translateY(${moveY}px)`;
           
           // Find potential drop target
           const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
@@ -132,7 +162,12 @@ function updatePlayerList() {
           e.preventDefault();
         }, { passive: false });
 
-        li.addEventListener('touchend', () => {
+        li.addEventListener('touchend', (e) => {
+          // Handle tap on delete button
+          if (!isDragging && e.target.closest('.delete-btn')) {
+            return;
+          }
+          
           if (!isDragging) return;
           
           isDragging = false;
