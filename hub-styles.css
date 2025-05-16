@@ -209,4 +209,66 @@ body {
         animation: none !important;
         transition: none !important;
     }
+}
+
+/* Landscape orientation */
+@media (orientation: landscape) and (max-height: 600px) {
+  .setup-container {
+    padding: 10px;
+    min-height: auto;
+  }
+
+  .container {
+    padding: 15px;
+  }
+
+  .title-container {
+    margin-bottom: 20px;
+    padding: 10px;
+  }
+
+  .game-title {
+    font-size: clamp(2rem, 5vw, 3rem);
+  }
+
+  .game-subtitle {
+    font-size: clamp(0.8rem, 3vw, 1.2rem);
+  }
+
+  .games-grid {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    padding: 10px 0;
+    max-height: 60vh;
+    overflow-y: auto;
+  }
+
+  .game-card {
+    padding: 15px;
+  }
+
+  .game-card .game-icon {
+    font-size: 2em;
+    margin-bottom: 10px;
+  }
+
+  .game-card h2 {
+    font-size: 1.2em;
+    margin: 5px 0;
+  }
+
+  .game-card p {
+    font-size: 0.9em;
+    margin: 5px 0;
+  }
+
+  .game-card .player-count {
+    font-size: 0.8em;
+    margin: 5px 0;
+  }
+
+  .game-card .game-tag {
+    font-size: 0.7em;
+    padding: 3px 8px;
+  }
 } 

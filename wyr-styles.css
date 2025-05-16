@@ -7,9 +7,6 @@
   --gradient-1: linear-gradient(45deg, #ff6b6b, #ff8e53);
   --gradient-2: linear-gradient(45deg, #4facfe, #00f2fe);
   --gradient-3: linear-gradient(45deg, #667eea, #764ba2);
-  --question-bg: white;
-  --question-text: #333;
-  --container-bg: #f5f7fa;
 }
 
 * {
@@ -37,7 +34,6 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  will-change: transform;
 }
 
 .container {
@@ -46,16 +42,12 @@ body {
   border-radius: 20px;
   padding: 30px;
   box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transform: translateZ(0);
-  will-change: transform;
 }
 
 .title-container {
   text-align: center;
   margin-bottom: 40px;
   padding: 20px;
-  transform: translateZ(0);
 }
 
 .game-title {
@@ -68,7 +60,6 @@ body {
   -webkit-text-fill-color: transparent;
   letter-spacing: 2px;
   line-height: 1.2;
-  transform: translateZ(0);
 }
 
 .game-subtitle {
@@ -92,7 +83,7 @@ body {
   font-size: clamp(0.9rem, 3vw, 1.1rem);
 }
 
-select {
+input, select {
   width: 100%;
   padding: clamp(8px, 2vw, 12px);
   border-radius: 12px;
@@ -103,7 +94,7 @@ select {
   background: white;
 }
 
-select:focus {
+input:focus, select:focus {
   outline: none;
   border-color: var(--primary-color);
   box-shadow: 0 0 0 3px rgba(0,105,217,0.1);
@@ -121,9 +112,7 @@ button {
   color: white;
   text-transform: uppercase;
   letter-spacing: 1px;
-  transform: translateZ(0);
-  will-change: transform;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
 button:hover {
@@ -131,8 +120,78 @@ button:hover {
   box-shadow: 0 5px 15px rgba(255, 107, 107, 0.2);
 }
 
-button:active {
-  transform: translateY(0);
+.player-list-container {
+  margin: 20px 0;
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 12px;
+  padding: 20px;
+  border: 2px solid rgba(0,105,217,0.1);
+}
+
+.player-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.edit-button {
+  width: auto;
+  padding: 8px 15px;
+  font-size: 0.9rem;
+  background: var(--gradient-2);
+}
+
+#playerOrderList {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.player-item {
+  display: flex;
+  align-items: center;
+  padding: 12px 15px;
+  margin-bottom: 8px;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  transition: all 0.2s ease;
+}
+
+.player-item:hover {
+  background-color: #f8f9fa;
+}
+
+.player-item .drag-handle {
+  cursor: grab;
+  padding: 8px;
+  color: #666;
+  user-select: none;
+  opacity: 0.7;
+}
+
+.player-item .player-name {
+  flex: 1;
+  margin: 0 10px;
+  font-size: clamp(14px, 3vw, 16px);
+  font-weight: 500;
+}
+
+.player-item .delete-btn {
+  background: none;
+  border: none;
+  color: #ff4444;
+  cursor: pointer;
+  padding: 8px;
+  font-size: 16px;
+  width: auto;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.player-item .delete-btn:hover {
+  opacity: 1;
 }
 
 .game-rules {
@@ -173,7 +232,6 @@ button:active {
   z-index: 1000;
   padding: 20px;
   text-align: center;
-  transform: translateZ(0);
 }
 
 .game-content {
@@ -189,77 +247,125 @@ button:active {
 .top-buttons {
   position: fixed;
   top: 20px;
-  left: 110px;
+  left: 70px;
   display: flex;
   gap: 10px;
   z-index: 1000;
 }
 
-.menu-button {
-  position: fixed;
-  top: 20px;
-  left: 20px;
+.menu-button, .intensity-button {
   width: auto;
   padding: 8px 15px;
   font-size: 0.9em;
   background-color: rgba(0, 0, 0, 0.1);
   color: var(--text-color);
   border-radius: 20px;
-  transition: all 0.3s ease;
-  z-index: 1000;
 }
 
-.intensity-button {
-  width: auto;
-  padding: 8px 15px;
-  font-size: 0.9em;
-  background-color: rgba(0, 0, 0, 0.1);
-  color: var(--text-color);
-  border-radius: 20px;
-  transition: all 0.3s ease;
-}
-
-.menu-button:hover,
-.intensity-button:hover {
+.menu-button:hover, .intensity-button:hover {
   background-color: rgba(0, 0, 0, 0.2);
-  transform: translateY(-2px);
 }
 
-.question-display {
-  font-size: clamp(1.2rem, 4vw, 1.8rem);
-  margin: 30px;
-  padding: clamp(30px, 5vw, 50px);
+.player-name {
+  font-size: clamp(1.5rem, 6vw, 3rem);
+  margin-bottom: 30px;
+  padding: 20px 40px;
   background: white;
   border-radius: 20px;
   box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+}
+
+.question-display {
   width: 100%;
   max-width: 800px;
-  position: relative;
-  overflow: visible;
-  transition: all 0.3s ease;
+  margin: 20px auto;
+  padding: 30px;
 }
 
-.statement-text {
-  font-size: clamp(1.5rem, 4vw, 2rem);
+.question-text {
+  font-size: clamp(1.5rem, 5vw, 2rem);
   color: #666;
-  margin-bottom: 20px;
-  font-weight: 500;
+  margin-bottom: 30px;
 }
 
-.never-statement {
-  font-size: clamp(1.8rem, 6vw, 2.5rem);
-  font-weight: 600;
-  color: var(--text-color);
+.choice-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  align-items: center;
+}
+
+.choice-btn {
+  width: 100%;
+  max-width: 600px;
+  padding: 30px;
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  border-radius: 20px;
+  text-align: center;
   line-height: 1.4;
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.choice-btn:disabled {
+  cursor: default;
+}
+
+.choice-btn.selected {
+  transform: scale(1.05);
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+.choice-btn.not-selected {
+  transform: scale(0.95);
+  opacity: 0.6;
+}
+
+.option-a {
+  background: var(--gradient-2);
+}
+
+.option-b {
+  background: var(--gradient-3);
+}
+
+.vs-text {
+  font-size: clamp(1.2rem, 4vw, 1.6rem);
+  font-weight: bold;
+  color: #666;
+  margin: 15px 0;
 }
 
 .next-button {
-  font-size: clamp(1.1rem, 3vw, 1.3rem);
-  padding: 15px 30px;
-  background: var(--gradient-2);
-  border-radius: 50px;
-  max-width: 300px;
-  margin-top: 20px;
+  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  padding: 12px 25px;
+  background: none;
+  border: none;
+  color: #666;
+  margin-top: 30px;
+  cursor: default;
+  transition: all 0.3s ease;
+}
+
+.next-text {
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.next-button.clickable {
+  cursor: pointer;
+}
+
+.next-button.clickable .next-text:hover {
+  opacity: 1;
+}
+
+.player-order-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  width: 100%;
 }
 
 .hub-button {
@@ -280,50 +386,11 @@ button:active {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-.hub-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
-}
-
-/* Mobile Responsive Adjustments */
-@media (max-width: 480px) {
-  .container {
-    padding: 20px;
-  }
-  
-  .title-container {
-    padding: 10px;
-    margin-bottom: 30px;
-  }
-  
-  .input-group {
-    margin-bottom: 20px;
-  }
-  
-  .game-rules {
-    padding: 15px;
-  }
-  
-  .question-display {
-    margin: 15px;
-    padding: clamp(20px, 4vw, 30px);
-  }
-  
-  .statement-text {
-    margin-bottom: 15px;
-  }
-  
-  .next-button {
-    padding: 12px 25px;
-  }
-}
-
-/* Reduce motion */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    animation: none !important;
-    transition: none !important;
-  }
+.copyright {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-size: 0.9em;
 }
 
 /* Landscape orientation */
@@ -354,56 +421,53 @@ button:active {
     margin-bottom: 15px;
   }
 
-  .game-rules {
-    padding: 15px;
+  .player-list-container {
     max-height: 30vh;
     overflow-y: auto;
   }
 
-  .game-rules h3 {
-    font-size: clamp(1rem, 3vw, 1.2rem);
-    margin-bottom: 10px;
+  .game-rules {
+    max-height: 30vh;
+    overflow-y: auto;
   }
 
-  .game-rules li {
-    font-size: clamp(0.8rem, 2.5vw, 1rem);
-    margin-bottom: 5px;
+  .choice-buttons {
+    flex-direction: row;
+    gap: 15px;
   }
 
-  .game-container {
-    padding: 10px;
-  }
-
-  .question-display {
-    margin: 15px;
-    padding: 25px;
-    font-size: clamp(1.2rem, 4vw, 1.6rem);
-  }
-
-  .statement-text {
-    font-size: clamp(1.2rem, 3vw, 1.6rem);
-    margin-bottom: 10px;
-  }
-
-  .never-statement {
-    font-size: clamp(1.4rem, 4vw, 2rem);
-  }
-
-  .next-button {
-    padding: 12px 25px;
-    font-size: clamp(1rem, 3vw, 1.2rem);
+  .choice-btn {
+    padding: 20px;
+    font-size: clamp(1rem, 3vw, 1.4rem);
   }
 }
 
-.copyright {
-  position: fixed;
-  bottom: 10px;
-  left: 50%;
-  transform: translateX(-50%);
-  font-size: 0.8rem;
-  color: #666;
-  text-align: center;
-  width: 100%;
-  padding: 10px;
-  z-index: 1000;
+@media (max-width: 767px) {
+  .container {
+    padding: 20px;
+  }
+  
+  .title-container {
+    padding: 10px;
+    margin-bottom: 30px;
+  }
+  
+  .choice-buttons {
+    gap: 15px;
+  }
+  
+  .choice-btn {
+    padding: 20px;
+  }
+  
+  .vs-text {
+    margin: 10px 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
 } 
