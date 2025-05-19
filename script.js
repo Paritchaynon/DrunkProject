@@ -8,6 +8,7 @@ let lastScrollY = 0;
 let lastTouchY = 0;
 let touchOffsetY = 0;
 let touchOffsetX = 0;
+let sortableInstance = null; // Store Sortable instance
 
 function addPlayer() {
   const input = document.getElementById("playerInput");
@@ -40,7 +41,6 @@ function updatePlayerList() {
     li.className = "player-item";
     
     if (isEditMode) {
-      li.draggable = true;
       li.innerHTML = `
         <span class="drag-handle">⋮⋮</span>
         <span class="player-name">${player}</span>
@@ -54,189 +54,33 @@ function updatePlayerList() {
         e.stopPropagation();
         removePlayer(index);
       });
-      
-      // Mouse drag events
-      li.addEventListener('dragstart', (e) => {
-        // Don't start drag if clicking delete button
-        if (e.target.closest('.delete-btn')) {
-          e.preventDefault();
-          return;
-        }
-        e.dataTransfer.setData('text/plain', index);
-        li.classList.add('dragging');
-      });
-      
-      li.addEventListener('dragend', () => {
-        li.classList.remove('dragging');
-      });
-      
-      li.addEventListener('dragover', (e) => {
-        e.preventDefault();
-      });
-      
-      li.addEventListener('drop', (e) => {
-        e.preventDefault();
-        const fromIndex = parseInt(e.dataTransfer.getData('text/plain'));
-        const toIndex = index;
-        
-        if (fromIndex !== toIndex) {
-          const [movedPlayer] = players.splice(fromIndex, 1);
-          players.splice(toIndex, 0, movedPlayer);
-          updatePlayerList();
-        }
-      });
-
-      // Touch events for mobile
-      let touchStartY = 0;
-      let touchStartX = 0;
-      let touchStartIndex = -1;
-      let isDragging = false;
-      let targetIndex = -1;
-      let initialY = 0;
-      let currentY = 0;
-      let touchStartTime = 0;
-      
-      li.addEventListener('touchstart', (e) => {
-        // Don't start drag if touching delete button
-        if (e.target.closest('.delete-btn')) {
-          return;
-        }
-
-        const touch = e.touches[0];
-        const rect = li.getBoundingClientRect();
-        
-        touchStartY = touch.clientY;
-        touchStartX = touch.clientX;
-        touchStartIndex = index;
-        targetIndex = index;
-        
-        // Set initial position
-        li.style.position = 'fixed';
-        li.style.width = rect.width + 'px';
-        li.style.left = rect.left + 'px';
-        li.style.top = touch.clientY + 'px';
-        li.style.transform = 'translateY(-50%)';
-        li.style.zIndex = '9999';
-        
-        // Move to document body to avoid containment issues
-        document.body.appendChild(li);
-        
-        // Create placeholder
-        const placeholder = document.createElement('li');
-        placeholder.className = 'player-item placeholder';
-        placeholder.style.visibility = 'hidden';
-        listElement.insertBefore(placeholder, listElement.children[index]);
-        
-        e.preventDefault();
-      }, { passive: false });
-
-      li.addEventListener('touchmove', (e) => {
-        if (e.target.closest('.delete-btn')) return;
-        
-        const touch = e.touches[0];
-        const deltaX = touch.clientX - touchStartX;
-        const deltaY = touch.clientY - touchStartY;
-        
-        // Only start dragging if moved more than 10px vertically
-        if (!isDragging && Math.abs(deltaY) > 10 && Math.abs(deltaY) > Math.abs(deltaX)) {
-          isDragging = true;
-          li.classList.add('dragging');
-          
-          // Show placeholder once dragging starts
-          const placeholder = listElement.querySelector('.placeholder');
-          if (placeholder) {
-            placeholder.style.visibility = 'visible';
-          }
-        }
-        
-        if (!isDragging) return;
-        
-        e.preventDefault();
-        
-        // Update position to follow finger exactly
-        li.style.top = touch.clientY + 'px';
-        
-        // Find potential drop target
-        const elements = document.elementsFromPoint(touch.clientX, touch.clientY);
-        const hoverItem = elements.find(el => 
-          el.classList.contains('player-item') && 
-          !el.classList.contains('dragging') &&
-          !el.classList.contains('placeholder')
-        );
-        
-        if (hoverItem) {
-          const hoverIndex = Array.from(listElement.children).indexOf(hoverItem);
-          if (hoverIndex !== targetIndex) {
-            // Move placeholder
-            const placeholder = listElement.querySelector('.placeholder');
-            if (hoverIndex > targetIndex) {
-              hoverItem.parentNode.insertBefore(placeholder, hoverItem.nextSibling);
-            } else {
-              hoverItem.parentNode.insertBefore(placeholder, hoverItem);
-            }
-            targetIndex = hoverIndex;
-          }
-        }
-      }, { passive: false });
-
-      li.addEventListener('touchend', (e) => {
-        // Handle tap on delete button
-        if (!isDragging && e.target.closest('.delete-btn')) {
-          return;
-        }
-        
-        if (!isDragging) return;
-        
-        isDragging = false;
-        
-        // Get the placeholder
-        const placeholder = listElement.querySelector('.placeholder');
-        
-        // Move the item back to the list at the placeholder position
-        if (placeholder) {
-          li.style.position = '';
-          li.style.width = '';
-          li.style.left = '';
-          li.style.top = '';
-          li.style.transform = '';
-          li.style.zIndex = '';
-          li.classList.remove('dragging');
-          
-          listElement.insertBefore(li, placeholder);
-          placeholder.remove();
-        }
-        
-        if (targetIndex !== touchStartIndex) {
-          const [movedPlayer] = players.splice(touchStartIndex, 1);
-          players.splice(targetIndex, 0, movedPlayer);
-          updatePlayerList();
-        }
-      });
-
-      li.addEventListener('touchcancel', () => {
-        isDragging = false;
-        li.style.position = '';
-        li.style.width = '';
-        li.style.left = '';
-        li.style.top = '';
-        li.style.zIndex = '';
-        li.style.transform = '';
-        li.classList.remove('dragging');
-        
-        // Remove placeholder
-        const placeholder = listElement.querySelector('.placeholder');
-        if (placeholder) {
-          placeholder.remove();
-        }
-        
-        updatePlayerList();
-      });
     } else {
       li.innerHTML = `<span class="player-name">${player}</span>`;
     }
     
     listElement.appendChild(li);
   });
+
+  // Initialize SortableJS only once when entering edit mode
+  if (isEditMode && !sortableInstance) {
+    sortableInstance = new Sortable(listElement, {
+      animation: 150,
+      handle: '.drag-handle',
+      ghostClass: 'placeholder',
+      dragClass: 'dragging',
+      forceFallback: true, // Force fallback for better mobile performance
+      fallbackClass: 'dragging',
+      onEnd: function(evt) {
+        const fromIndex = evt.oldIndex;
+        const toIndex = evt.newIndex;
+        if (fromIndex !== toIndex) {
+          const [movedPlayer] = players.splice(fromIndex, 1);
+          players.splice(toIndex, 0, movedPlayer);
+          updatePlayerList();
+        }
+      }
+    });
+  }
 }
 
 function removePlayer(index) {
@@ -248,6 +92,12 @@ function toggleEditMode() {
   isEditMode = !isEditMode;
   const editBtn = document.getElementById("editModeBtn");
   editBtn.textContent = isEditMode ? "✅ เสร็จสิ้น" : "✏️ จัดตำแหน่ง";
+  
+  if (!isEditMode && sortableInstance) {
+    sortableInstance.destroy();
+    sortableInstance = null;
+  }
+  
   updatePlayerList();
 }
 
