@@ -7,7 +7,7 @@ const firebaseConfig = {
     messagingSenderId: "149323200330",
     appId: "1:149323200330:web:5664f49d85698042eb73b3",
     measurementId: "G-46EX0GRC6X"
-  };
+};
 
 // Initialize Firebase
 firebase.initializeApp(firebaseConfig);
@@ -44,6 +44,14 @@ const App = () => {
     const [voteSubmitted, setVoteSubmitted] = React.useState(false);
     const [isLoading, setIsLoading] = React.useState(false);
     const [initialSubmissionEnded, setInitialSubmissionEnded] = React.useState(false);
+    const [copied, setCopied] = React.useState(false);
+    const handleCopyCode = () => {
+        if (roomId) {
+            navigator.clipboard.writeText(roomId);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 1200);
+        }
+    };
 
     // Helper to set up Firestore listener for a room and its players subcollection
     const listenToRoom = (id) => {
@@ -560,263 +568,151 @@ const App = () => {
         </ul>
     );
 
-    // Render the appropriate view based on gamePhase and local state
+    const renderPlayerList = () => (
+        <div className="player-list-container">
+          <div className="player-list-header">
+            <strong>👥 ผู้เล่น ({players.length})</strong>
+          </div>
+          <div className="player-list">
+            <ul className="player-order-list">
+              {players.map(player => (
+                <li key={player.id} className="player-item">
+                  <span className="player-status"></span>
+                  <span>{player.name}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      );
+      
+    // Main render function
     const renderView = () => {
-        // Always show a base container, content changes based on phase
-        return (
-            <div className="flex flex-col items-center justify-center min-h-screen p-4">
-                <h1 className="text-4xl font-bold mb-8">Secret Guessing Game</h1>
-                {/* Render content based on view and gamePhase */}
-                {view === 'lobby' && (
-                    <div className="w-full max-w-md">
-                        <form className="w-full max-w-md mb-6" onSubmit={e => {
-                            e.preventDefault();
-                            const roomNameInput = e.target.elements[0];
-                            createRoom(roomNameInput.value);
-                        }}>
-                            <input
-                                type="text"
-                                placeholder="Create a room name (e.g. แม่กำปอง)"
-                                className="w-full p-3 border rounded-lg mb-2"
-                                maxLength="30"
-                                disabled={isLoading} // Disable input while loading
-                            />
-                            <button
-                                type="submit"
-                                className="w-full bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
-                                disabled={isLoading} // Disable button while loading
+        if (view === 'lobby') {
+            return (
+                <div className="container animate__animated animate__fadeIn">
+                    <div className="title-container">
+                        <h1 className="game-title">Secret Guessing Game</h1>
+                        <div className="game-subtitle">วงเหล้า Edition</div>
+                    </div>
+                    <div className="game-rules">
+                        <h3>📜 กติกา</h3>
+                        <ul>
+                            <li>🎯 ผู้เล่นจะต้องทายความลับของเพื่อน</li>
+                        </ul>
+                    </div>
+                    <form className="input-group" onSubmit={e => { e.preventDefault(); createRoom(e.target.elements[0].value); }}>
+                        <input type="text" placeholder="ตั้งชื่อห้อง (เช่น แม่กำปอง)" className="form-input" maxLength="30" />
+                        <button type="submit" className="start-button">🎮 สร้างห้องใหม่</button>
+                    </form>
+                    <form className="input-group" onSubmit={e => { e.preventDefault(); joinRoomByCode(e.target.elements[0].value.trim().toUpperCase()); }}>
+                        <input type="text" placeholder="รหัสห้อง (เช่น ABC123)" className="form-input" maxLength="6" style={{ textTransform: 'uppercase' }} required />
+                        <button type="submit" className="start-button">🔗 เข้าร่วมห้อง</button>
+                    </form>
+                    <div className="room-list-container">
+                        <div className="room-list-header">ห้องที่เปิดอยู่</div>
+                        <button className="start-button" style={{marginBottom: '10px'}} onClick={fetchRoomList}>รีเฟรช</button>
+                        {isLoading && <div className="game-subtitle">กำลังโหลด...</div>}
+                        {!isLoading && roomList.length === 0 && <div className="game-subtitle">ไม่มีห้องที่เปิดอยู่</div>}
+                        {!isLoading && roomList.length > 0 && (
+                            <ul className="room-list">
+                                {roomList.map(room => (
+                                    <li key={room.id} className="room-list-item">
+                                        <span><b>{room.name || '(ไม่มีชื่อห้อง)'}</b> <span className="room-code">({room.code || room.id})</span></span>
+                                        <button className="choice-btn" onClick={() => joinRoomByCode(room.code || room.id)}>เข้าร่วม</button>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+        if (view === 'enterName') {
+            return (
+                <div className="container animate__animated animate__fadeIn">
+                    <div className="title-container">
+                        <h1 className="game-title">ใส่ชื่อของคุณ</h1>
+                    </div>
+                    <form className="input-group" onSubmit={e => { e.preventDefault(); addPlayer(e.target.elements[0].value.trim()); }}>
+                        <input type="text" placeholder="ชื่อของคุณ" className="form-input" maxLength="30" required />
+                        <button type="submit" className="start-button">เข้าร่วมเกม</button>
+                    </form>
+                </div>
+            );
+        }
+        if ((view === 'waiting' || view === 'submitted') && roomName) {
+            return (
+                <div className="container animate__animated animate__fadeIn">
+                    <div className="title-container">
+                        <h1 className="game-title">{roomName}</h1>
+                        <div className="game-subtitle">
+                            รหัสห้อง:
+                            <span
+                                className={copied ? "room-code copied" : "room-code"}
+                                onClick={handleCopyCode}
+                                title={copied ? "คัดลอกแล้ว!" : "แตะเพื่อคัดลอก"}
                             >
-                                {isLoading ? 'Creating Room...' : 'Create New Room'}
-                            </button>
-                        </form>
-                        <form className="w-full max-w-md mb-6" onSubmit={e => {
-                            e.preventDefault();
-                            const roomCodeInput = e.target.elements[0];
-                            const code = roomCodeInput.value.trim().toUpperCase();
-                            joinRoomByCode(code);
-                        }}>
-                            <input
-                                type="text"
-                                placeholder="Enter room code (e.g. ABC123)"
-                                className="w-full p-3 border rounded-lg mb-2"
-                                maxLength="6"
-                                style={{ textTransform: 'uppercase' }}
-                                required
-                                disabled={isLoading} // Disable input while loading
-                            />
-                            <button
-                                type="submit"
-                                className="w-full bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:opacity-50"
-                                disabled={isLoading} // Disable button while loading
-                            >
-                                {isLoading ? 'Joining Room...' : 'Join by Code'}
-                            </button>
-                        </form>
-                        <div className="w-full max-w-md mb-4">
-                            <h2 className="text-xl font-semibold mb-2">Available Rooms</h2>
-                            <button onClick={fetchRoomList} className="mb-2 text-blue-500 underline" disabled={isLoading}>
-                                {isLoading ? 'Refreshing...' : 'Refresh'}
-                            </button>
-                            {isLoading && <div className="text-gray-500">Loading rooms...</div>}
-                            {!isLoading && roomList.length === 0 && <div className="text-gray-500">No rooms available</div>}
-                            {!isLoading && roomList.length > 0 && (
-                                <ul className="space-y-2">
-                                    {roomList.map(room => {
-                                        // Use room.name if it exists, otherwise use a placeholder
-                                        const displayName = room.name ? room.name : '(No Name)';
-                                        return (
-                                            <li key={room.id} className="flex items-center justify-between bg-white rounded p-2 shadow">
-                                                <span>Room: <b>{displayName}</b> <span className="text-xs text-gray-500">({room.code || room.id})</span></span>
-                                                <button
-                                                    onClick={() => joinRoomByCode(room.code || room.id)}
-                                                    className="ml-2 bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600"
-                                                    disabled={isLoading}
-                                                >Join</button>
-                                            </li>
-                                        );
-                                    })}
-                                </ul>
-                            )}
+                                {roomId}
+                            </span>
+                            {copied && <span style={{color:'#059669',marginLeft:8,fontSize:'0.95em'}}>คัดลอกแล้ว!</span>}
                         </div>
+                        <div className="game-subtitle">รอผู้เล่นเข้าร่วมห้อง</div>
                     </div>
-                )}
-
-                {view === 'enterName' && (
-                    <div className="w-full max-w-md">
-                        <h2 className="text-2xl font-bold mb-4">Enter Your Name</h2>
-                        <form onSubmit={e => {
-                            e.preventDefault();
-                            const nameInput = e.target.elements[0];
-                            if (nameInput.value.trim()) {
-                                addPlayer(nameInput.value.trim());
-                            }
-                        }}>
-                            <input
-                                type="text"
-                                placeholder="Your name"
-                                className="w-full p-3 border rounded-lg mb-4"
-                                maxLength="30"
-                                required
-                                disabled={isLoading}
+                    {renderPlayerList()}
+                    {gamePhase === 'lobby' && amIHost() && (
+                        <button onClick={startGame} className="start-button">เริ่มเกม</button>
+                    )}
+                    {gamePhase === 'lobby' && !amIHost() && (
+                        <div className="game-subtitle">รอเจ้าของห้องเริ่มเกม...</div>
+                    )}
+                    {gamePhase === 'initial_submitting' && (
+                        players.find(p => p.id === playerId)?.initialSecretsSubmitted ? (
+                            <div className="game-subtitle">รอผู้เล่นคนอื่นส่งความลับ...</div>
+                        ) : (
+                            <SecretComponents.SecretSubmission
+                                onSubmit={e => { e.preventDefault(); submitSecret(e.target.elements[0].value); }}
+                                onBack={leaveRoom}
                             />
-                            <button
-                                type="submit"
-                                className="w-full bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition disabled:opacity-50"
-                                disabled={isLoading}
-                            >
-                                {isLoading ? 'Joining...' : 'Join Game'}
-                            </button>
-                        </form>
-                        <button
-                            onClick={leaveRoom}
-                            className="w-full mt-4 bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400 transition"
-                        >
-                            Cancel
-                        </button>
-                    </div>
-                )}
-
-                {(view === 'waiting' || view === 'submitted') && roomName && (
-                    // Content shown when inside a room (regardless of phase)
-                    <div className="w-full max-w-md flex flex-col items-center">
-                        <h2 className="text-2xl font-bold mb-4">Room: {roomName}</h2>
-                        <SecretComponents.PlayerList players={players} />
-
-                        {/* Lobby specific content */}
-                        {gamePhase === 'lobby' && amIHost() && (
-                            <button
-                                onClick={startGame}
-                                className="mt-6 bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition"
-                            >
-                                Start Game
-                            </button>
+                        )
+                    )}
+                    {gamePhase === 'voting' && currentSecret && (
+                        <SecretComponents.VotingPhase
+                            secret={currentSecret.text}
+                            players={players}
+                            onVote={castVote}
+                            onBack={leaveRoom}
+                            bigSecret={true}
+                        />
+                    )}
+                    {gamePhase === 'results' && currentSecret && (
+                        <>
+                        <SecretComponents.ResultsPhase
+                            secret={currentSecret.text}
+                            votes={votes}
+                            players={players}
+                            onBack={leaveRoom}
+                            bigSecret={true}
+                        />
+                        {amIHost() && secrets.filter(s => !s.revealed).length > 0 && (
+                            <button onClick={startNextRound} className="start-button">รอบถัดไป</button>
                         )}
-                        {gamePhase === 'lobby' && !amIHost() && (
-                            <div className="mt-6 text-gray-500">Waiting for host to start the game...</div>
+                        {amIHost() && (
+                            <button onClick={async () => { await db.collection('rooms').doc(roomId).update({ gamePhase: 'game_over' }); }} className="end-button">จบเกม</button>
                         )}
-
-                        {/* Initial Submitting Phase */}
-                        {gamePhase === 'initial_submitting' && (
-                            players.find(p => p.id === playerId)?.initialSecretsSubmitted ? (
-                                <div className="flex flex-col items-center">
-                                    <h2 className="text-2xl font-bold mb-4">Secret Submitted!</h2>
-                                    {renderInitialSubmissionStatus()}
-                                    <p className="mb-4">Waiting for all players to submit their secrets...</p>
-                                    {!amIHost() && (
-                                        <div className="mt-4 text-gray-500">Waiting for other players to submit...</div>
-                                    )}
-                                </div>
-                            ) : (
-                                <SecretComponents.SecretSubmission
-                                    onSubmit={(e) => {
-                                        e.preventDefault();
-                                        submitSecret(e.target.elements[0].value);
-                                    }}
-                                    onBack={leaveRoom}
-                                />
-                            )
-                        )}
-
-                        {/* Voting Phase */}
-                        {gamePhase === 'voting' && currentSecret && (
-                            <div className="flex flex-col items-center w-full">
-                                <h2 className="text-2xl font-bold mb-4">Round {currentRound}</h2>
-                                <h3 className="text-xl mb-4">Who's Secret Is This?</h3>
-                                <div className="bg-white rounded-lg shadow p-6 mb-8 w-full">
-                                    <p className="text-lg mb-4">{currentSecret.text}</p>
-                                </div>
-                                
-                                {players.find(p => p.id === playerId)?.hasVoted ? (
-                                    <div className="flex flex-col items-center">
-                                        <h2 className="text-2xl font-bold mb-4">Vote Submitted!</h2>
-                                        {renderVotingStatus()}
-                                        <p className="mb-4">Waiting for all players to vote...</p>
-                                    </div>
-                                ) : (
-                                    <form onSubmit={e => {
-                                        e.preventDefault();
-                                        if (selectedVote) castVote(selectedVote);
-                                    }} className="w-full">
-                                        <div className="grid grid-cols-2 gap-4 mb-4">
-                                            {players.map(player => (
-                                                player.id !== playerId && (
-                                                    <button
-                                                        key={player.id}
-                                                        type="button"
-                                                        onClick={() => setSelectedVote(player.id)}
-                                                        className={`py-3 px-6 rounded-lg transition ${
-                                                            selectedVote === player.id 
-                                                                ? 'bg-blue-600 text-white' 
-                                                                : 'bg-blue-500 text-white hover:bg-blue-600'
-                                                        }`}
-                                                    >
-                                                        {player.name}
-                                                    </button>
-                                                )
-                                            ))}
-                                        </div>
-                                        <button
-                                            type="submit"
-                                            disabled={!selectedVote}
-                                            className="w-full bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition disabled:opacity-50"
-                                        >
-                                            Submit Vote
-                                        </button>
-                                    </form>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Results Phase */}
-                        {gamePhase === 'results' && currentSecret && (
-                            <div className="flex flex-col items-center w-full">
-                                <h2 className="text-2xl font-bold mb-4">Round {currentRound} Results</h2>
-                                <SecretComponents.ResultsPhase
-                                    secret={currentSecret.text}
-                                    votes={votes}
-                                    players={players}
-                                    onBack={leaveRoom}
-                                />
-                                {amIHost() && (
-                                    <button
-                                        onClick={startNextRound}
-                                        className="mt-6 bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition"
-                                    >
-                                        {secrets.filter(s => !s.revealed).length > 0 ? 'Next Round' : 'End Game'}
-                                    </button>
-                                )}
-                                {!amIHost() && (
-                                    <div className="mt-6 text-gray-500">
-                                        {secrets.filter(s => !s.revealed).length > 0 ? 'Waiting for host to start next round...' : 'Game Over!'}
-                                    </div>
-                                )}
-                            </div>
-                        )}
-
-                        {/* Game Over Phase */}
-                        {gamePhase === 'game_over' && (
-                            <div className="flex flex-col items-center">
-                                <h2 className="text-4xl font-bold mb-4">Game Over!</h2>
-                                <p className="mb-8">All secrets have been revealed.</p>
-                                <button
-                                    onClick={leaveRoom}
-                                    className="mt-4 bg-gray-300 text-gray-800 py-2 px-4 rounded hover:bg-gray-400 transition"
-                                >
-                                    Back to Lobby
-                                </button>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {/* Fallback/Loading state */}
-                {isLoading && <div className="text-gray-500">Loading...</div>}
-                {/* Initial state or if somehow not in a recognized phase/room */}
-                {!(view === 'lobby' || view === 'enterName' || view === 'waiting' || view === 'submitted') && !isLoading && (
-                    <div className="text-gray-500">Initializing game...</div>
-                )}
-            </div>
-        );
+                        </>
+                    )}
+                    {gamePhase === 'game_over' && (
+                        <div className="title-container">
+                            <h1 className="game-title">เกมจบแล้ว!</h1>
+                            <div className="game-subtitle">ความลับทั้งหมดถูกเปิดเผยแล้ว</div>
+                            <button onClick={leaveRoom} className="start-button">กลับสู่หน้าหลัก</button>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+        return <div className="container"><div className="game-title">Loading...</div></div>;
     };
 
     // Leave room logic

@@ -1,141 +1,170 @@
 // Game Components
 const Lobby = ({ onJoinRoom, onCreateRoom }) => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <h1 className="text-4xl font-bold mb-8">Secret Guessing Game</h1>
-        <div className="space-y-4 w-full max-w-md">
-            <button
-                onClick={onCreateRoom}
-                className="w-full bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-            >
-                Create New Room
-            </button>
-            <div className="relative">
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                </div>
-                <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-gray-100 text-gray-500">or</span>
-                </div>
+    <div className="setup-container animate__animated animate__fadeIn">
+        <button onClick={() => window.location.href = 'index.html'} className="hub-button">🏠</button>
+        <div className="container">
+            <div className="title-container">
+                <h1 className="game-title">Secret Guessing Game</h1>
+                <div className="game-subtitle">วงเหล้า Edition</div>
             </div>
-            <button
-                onClick={onJoinRoom}
-                className="w-full bg-green-500 text-white py-3 px-6 rounded-lg hover:bg-green-600 transition"
-            >
-                Join Existing Room
-            </button>
+            
+            <div className="game-rules">
+                <h3>📜 กติกา</h3>
+                <ul>
+                    <li>🎯 ผู้เล่นจะต้องทายความลับของเพื่อน</li>
+                    <li>🍺 ถ้าทายผิดต้องดื่ม!</li>
+                    <li>🤔 ถ้าทายถูกเพื่อนต้องดื่ม!</li>
+                    <li>😅 ถ้าไม่ยอมบอกความลับต้องดื่ม 2 เท่า!</li>
+                </ul>
+            </div>
+
+            <div className="choice-buttons">
+                <button
+                    onClick={onCreateRoom}
+                    className="choice-btn truth-btn animate__animated animate__pulse"
+                >
+                    🎮 สร้างห้องใหม่
+                </button>
+                <button
+                    onClick={onJoinRoom}
+                    className="choice-btn dare-btn animate__animated animate__pulse"
+                >
+                    🔗 เข้าร่วมห้อง
+                </button>
+            </div>
         </div>
     </div>
 );
 
 const RoomCodeInput = ({ onSubmit, onBack }) => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <h2 className="text-2xl font-bold mb-4">Enter Room Code</h2>
-        <form onSubmit={onSubmit} className="w-full max-w-md space-y-4">
-            <input
-                type="text"
-                placeholder="Enter 6-digit code"
-                className="w-full p-3 border rounded-lg"
-                maxLength="6"
-                pattern="[A-Za-z0-9]{6}"
-                required
-            />
-            <div className="flex space-x-4">
-                <button
-                    type="button"
-                    onClick={onBack}
-                    className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition"
-                >
-                    Back
-                </button>
-                <button
-                    type="submit"
-                    className="flex-1 bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-                >
-                    Join
-                </button>
+    <div className="setup-container animate__animated animate__fadeIn">
+        <button onClick={onBack} className="hub-button">🏠</button>
+        <div className="container">
+            <div className="title-container">
+                <h1 className="game-title">เข้าร่วมห้อง</h1>
             </div>
-        </form>
+            
+            <form onSubmit={onSubmit} className="space-y-4">
+                <div className="input-group">
+                    <label>รหัสห้อง:</label>
+                    <input
+                        type="text"
+                        placeholder="กรอกรหัส 6 ตัวอักษร"
+                        className="form-input"
+                        maxLength="6"
+                        pattern="[A-Za-z0-9]{6}"
+                        required
+                    />
+                </div>
+                <button type="submit" className="start-button animate__animated animate__pulse">
+                    🎯 เข้าร่วม
+                </button>
+            </form>
+        </div>
     </div>
 );
 
 const PlayerList = ({ players }) => (
-    <div className="bg-white rounded-lg shadow p-4">
-        <h3 className="text-xl font-semibold mb-4">Players ({players.length})</h3>
-        <ul className="space-y-2">
-            {players.map(player => (
-                <li key={player.id} className="flex items-center space-x-2">
-                    <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    <span>{player.name}</span>
-                </li>
-            ))}
-        </ul>
+    <div className="player-list-container">
+        <div className="player-list-header">
+            <strong>👥 ผู้เล่น ({players.length})</strong>
+        </div>
+        <div className="player-list">
+            <ul className="player-order-list">
+                {players.map(player => (
+                    <li key={player.id} className="player-item animate__animated animate__fadeIn">
+                        <span className="player-status"></span>
+                        <span>{player.name}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
     </div>
 );
 
 const SecretSubmission = ({ onSubmit, onBack }) => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <h2 className="text-2xl font-bold mb-4">Submit Your Secret</h2>
-        <form onSubmit={onSubmit} className="w-full max-w-md space-y-4">
+    <div className="container animate__animated animate__fadeIn">
+        <button onClick={onBack} className="hub-button">🏠</button>
+        <div className="title-container">
+            <h1 className="game-title">เขียนความลับของคุณ</h1>
+            <div className="game-subtitle">กรอกความลับของคุณด้านล่าง</div>
+        </div>
+        <form onSubmit={onSubmit} className="input-group">
+            <label htmlFor="secret-input">🤫 ความลับ:</label>
             <textarea
-                placeholder="Type your secret here..."
-                className="w-full p-3 border rounded-lg h-32"
+                id="secret-input"
+                placeholder="พิมพ์ความลับของคุณที่นี่..."
+                className="form-input"
+                style={{ height: '120px' }}
                 required
             />
-            <div className="flex space-x-4">
-                <button
-                    type="button"
-                    onClick={onBack}
-                    className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition"
-                >
-                    Back
-                </button>
-                <button
-                    type="submit"
-                    className="flex-1 bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-                >
-                    Submit
-                </button>
-            </div>
+            <button type="submit" className="start-button animate__animated animate__pulse">
+                ✨ ส่งความลับ
+            </button>
         </form>
     </div>
 );
 
-const VotingPhase = ({ secret, players, onVote, onBack }) => (
-    <div className="flex flex-col items-center justify-center min-h-screen p-4">
-        <h2 className="text-2xl font-bold mb-4">Who's Secret Is This?</h2>
-        <div className="bg-white rounded-lg shadow p-6 mb-8 max-w-md w-full">
-            <p className="text-lg mb-4">{secret}</p>
-        </div>
-        <div className="grid grid-cols-2 gap-4 w-full max-w-md">
-            {players.map(player => (
-                <button
-                    key={player.id}
-                    onClick={() => onVote(player.id)}
-                    className="bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-                >
-                    {player.name}
+const VotingPhase = ({ secret, players, onVote, onBack, bigSecret }) => {
+    const [selectedPlayerId, setSelectedPlayerId] = React.useState(null);
+    const [submitted, setSubmitted] = React.useState(false);
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (selectedPlayerId) {
+            onVote(selectedPlayerId);
+            setSubmitted(true);
+        }
+    };
+    return (
+        <div className="container animate__animated animate__fadeIn">
+            <button onClick={onBack} className="hub-button">🏠</button>
+            <div className="title-container">
+                <h1 className="game-title">ทายความลับ</h1>
+                <div className="game-subtitle">ใครเป็นเจ้าของความลับนี้?</div>
+            </div>
+            <div className="question-display animate__animated animate__fadeIn">
+                <div className={bigSecret ? "question-text big-secret" : "question-text"}>{secret}</div>
+            </div>
+            <form onSubmit={handleSubmit}>
+                <div className="player-carousel" style={{ justifyContent: 'center' }}>
+                    {players.map(player => (
+                        <div
+                            key={player.id}
+                            className={`player-card${selectedPlayerId === player.id ? ' selected animate__animated animate__pulse' : ''}`}
+                            onClick={() => !submitted && setSelectedPlayerId(player.id)}
+                            style={{ pointerEvents: submitted ? 'none' : 'auto', opacity: submitted && selectedPlayerId !== player.id ? 0.5 : 1 }}
+                        >
+                            <span className="player-icon">👤</span>
+                            <span>{player.name}</span>
+                        </div>
+                    ))}
+                </div>
+                <button type="submit" className="start-button" disabled={!selectedPlayerId || submitted}>
+                    {submitted ? 'ส่งคำตอบแล้ว!' : 'ส่งคำตอบ'}
                 </button>
-            ))}
+            </form>
         </div>
-    </div>
-);
+    );
+};
 
-const ResultsPhase = ({ secret, votes, players, onNextRound, onBack }) => {
+const ResultsPhase = ({ secret, votes, players, onBack, bigSecret }) => {
     const voteCounts = players.reduce((acc, player) => {
         acc[player.id] = Object.values(votes).filter(v => v === player.id).length;
         return acc;
     }, {});
-
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen p-4">
-            <h2 className="text-2xl font-bold mb-4">Voting Results</h2>
-            <div className="bg-white rounded-lg shadow p-6 mb-8 max-w-md w-full">
-                <p className="text-lg mb-4">{secret}</p>
-                <div className="space-y-4">
+        <div className="container animate__animated animate__fadeIn">
+            <button onClick={onBack} className="hub-button">🏠</button>
+            <div className="title-container">
+                <h1 className="game-title">ผลการทาย</h1>
+            </div>
+            <div className="question-display animate__animated animate__fadeIn">
+                <div className={bigSecret ? "question-text big-secret" : "question-text"}>{secret}</div>
+                <div className="results-container">
                     {players.map(player => (
-                        <div key={player.id} className="flex justify-between items-center">
-                            <span>{player.name}</span>
-                            <span className="font-bold">{voteCounts[player.id] || 0} votes</span>
+                        <div key={player.id} className="result-item animate__animated animate__fadeIn">
+                            <span>👤 {player.name}</span>
+                            <span className="font-bold">🎯 {voteCounts[player.id] || 0} โหวต</span>
                         </div>
                     ))}
                 </div>
