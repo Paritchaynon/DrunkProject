@@ -140,20 +140,6 @@ const ResultsPhase = ({ secret, votes, players, onNextRound, onBack }) => {
                     ))}
                 </div>
             </div>
-            <div className="flex space-x-4">
-                <button
-                    onClick={onBack}
-                    className="flex-1 bg-gray-500 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition"
-                >
-                    Back to Lobby
-                </button>
-                <button
-                    onClick={onNextRound}
-                    className="flex-1 bg-blue-500 text-white py-3 px-6 rounded-lg hover:bg-blue-600 transition"
-                >
-                    Next Round
-                </button>
-            </div>
         </div>
     );
 };
