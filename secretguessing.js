@@ -609,16 +609,21 @@ const App = () => {
                         <input type="text" placeholder="รหัสห้อง (เช่น ABC123)" className="form-input" maxLength="6" style={{ textTransform: 'uppercase' }} required />
                         <button type="submit" className="start-button">🔗 เข้าร่วมห้อง</button>
                     </form>
-                    <div className="room-list-container">
+                    <div className="room-list-container" style={{ textAlign: 'center' }}>
                         <div className="room-list-header">ห้องที่เปิดอยู่</div>
                         <button className="start-button" style={{marginBottom: '10px'}} onClick={fetchRoomList}>รีเฟรช</button>
                         {isLoading && <div className="game-subtitle">กำลังโหลด...</div>}
                         {!isLoading && roomList.length === 0 && <div className="game-subtitle">ไม่มีห้องที่เปิดอยู่</div>}
                         {!isLoading && roomList.length > 0 && (
-                            <ul className="room-list">
+                            <ul className="room-list" style={{ display: 'inline-block', textAlign: 'left', margin: '0 auto' }}>
                                 {roomList.map(room => (
-                                    <li key={room.id} className="room-list-item">
-                                        <span><b>{room.name || '(ไม่มีชื่อห้อง)'}</b> <span className="room-code">({room.code || room.id})</span></span>
+                                    <li key={room.id} className="room-list-item" style={{ margin: '0 auto', maxWidth: 350 }}>
+                                        <span>
+                                            {room.name || '(ไม่มีชื่อห้อง)'}
+                                            <span style={{ color: '#6b7280', fontSize: '0.95em', marginLeft: 8 }}>
+                                                ({room.code || room.id})
+                                            </span>
+                                        </span>
                                         <button className="choice-btn" onClick={() => joinRoomByCode(room.code || room.id)}>เข้าร่วม</button>
                                     </li>
                                 ))}
