@@ -79,7 +79,6 @@ const App = () => {
     // Helper function to select a random unrevealed secret
     const selectRandomUnrevealedSecret = (secrets) => {
         const unrevealedSecrets = secrets.filter(s => !s.revealed);
-        console.log('Unrevealed secrets for selection:', unrevealedSecrets); // Debug log
         if (unrevealedSecrets.length === 0) return null;
         return unrevealedSecrets[Math.floor(Math.random() * unrevealedSecrets.length)];
     };
@@ -129,11 +128,9 @@ const App = () => {
     const fetchRoomList = async () => {
         setIsLoading(true); // Start loading
         try {
-            console.log('Fetching room list...'); // Debug log
             // Only fetch rooms in 'lobby' or 'initial_submitting' phase
             const snap = await db.collection('rooms').where('gamePhase', 'in', ['lobby', 'initial_submitting']).get();
             const rooms = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            console.log('Fetched rooms:', rooms); // Debug log
             setRoomList(rooms);
         } catch (error) {
             console.error('Error fetching room list:', error);
@@ -181,7 +178,6 @@ const App = () => {
         setIsLoading(true); // Start loading
         let finalName = name && name.trim() ? name.trim() : getRandomPlace();
         const code = generateRoomCode();
-        console.log('Creating room:', { code, finalName }); // Debug log
         setRoomId(code);
         setRoomName(finalName);
         localStorage.setItem('roomId', code);
@@ -198,9 +194,7 @@ const App = () => {
                 fakeSecretMode: false,
                 createdAt: firebase.firestore.FieldValue.serverTimestamp()
             };
-            console.log('Creating room with data:', roomData); // Debug log
             await db.collection('rooms').doc(code).set(roomData);
-            console.log('Room created successfully'); // Debug log
             listenToRoom(code);
             setView('enterName'); // This should trigger the name entry view
         } catch (error) {
@@ -215,19 +209,16 @@ const App = () => {
     const joinRoomByCode = async (code) => {
         if (isLoading) return; // Prevent multiple clicks
         setIsLoading(true); // Start loading
-        console.log('Joining room:', code); // Debug log
         setRoomId(code);
         try {
             const roomRef = db.collection('rooms').doc(code);
             const roomDoc = await roomRef.get();
-            console.log('Room doc exists:', roomDoc.exists); // Debug log
             if (!roomDoc.exists) {
                 alert('Room not found.');
                 leaveRoom(); // Clear local state if room not found
                 return;
             }
             const roomData = roomDoc.data();
-            console.log('Room data:', roomData); // Debug log
             setRoomName(roomData.name || '');
             localStorage.setItem('roomName', roomData.name || '');
             listenToRoom(code);
@@ -298,7 +289,6 @@ const App = () => {
     const submitSecret = async (secret) => {
         if (gamePhase !== 'initial_submitting') return; // Only allow submission in this phase
         try {
-            console.log('Submitting secret:', { secret, playerId }); // Debug log
             const secretObj = {
                 text: secret,
                 ownerId: playerId,
@@ -309,11 +299,9 @@ const App = () => {
             // Get current secrets array first
             const roomDoc = await db.collection('rooms').doc(roomId).get();
             const currentSecrets = roomDoc.data().secrets || [];
-            console.log('Current secrets before adding:', currentSecrets); // Debug log
 
             // Add new secret to the array
             const updatedSecrets = [...currentSecrets, secretObj];
-            console.log('Updated secrets after adding:', updatedSecrets); // Debug log
 
             // Update the room with the new secrets array
             await db.collection('rooms').doc(roomId).update({
@@ -325,7 +313,6 @@ const App = () => {
                 initialSecretsSubmitted: true 
             });
 
-            console.log('Secret submitted successfully'); // Debug log
         } catch (error) {
             console.error('Error submitting secret:', error);
             alert('Failed to submit secret. Please try again.');
@@ -357,15 +344,12 @@ const App = () => {
             // Get the latest secrets array
             const roomDoc = await db.collection('rooms').doc(roomId).get();
             const allSecrets = roomDoc.data().secrets || [];
-            console.log('All secrets before starting first round:', allSecrets); // Debug log
 
             // Make sure all secrets are marked as unrevealed
             const updatedSecrets = allSecrets.map(s => ({ ...s, revealed: false }));
-            console.log('Reset all secrets to unrevealed:', updatedSecrets); // Debug log
 
             // Select a random unrevealed secret
             const secretToReveal = selectRandomUnrevealedSecret(updatedSecrets);
-            console.log('Selected first secret:', secretToReveal); // Debug log
 
             if (!secretToReveal) {
                 alert('No secrets were submitted or all have been revealed!');
@@ -386,12 +370,6 @@ const App = () => {
 
             // Update the revealed status
             updatedSecrets[secretIndex] = { ...updatedSecrets[secretIndex], revealed: true };
-
-            console.log('Starting first round with:', { // Debug log
-                secret: secretToReveal,
-                updatedSecrets,
-                currentRound: 1
-            });
 
             // Update everything in a single transaction to prevent flashing
             await db.collection('rooms').doc(roomId).update({
@@ -480,10 +458,8 @@ const App = () => {
             // Get the latest secrets array
             const roomDoc = await db.collection('rooms').doc(roomId).get();
             const allSecrets = roomDoc.data().secrets || [];
-            console.log('All secrets before next round:', allSecrets); // Debug log
 
             const unrevealedSecretsCount = allSecrets.filter(s => !s.revealed).length;
-            console.log('Unrevealed secrets count before next round check:', unrevealedSecretsCount); // Debug log
 
             // If no unrevealed secrets left, end the game
             if (unrevealedSecretsCount === 0) {
@@ -491,6 +467,8 @@ const App = () => {
                 await db.collection('rooms').doc(roomId).update({
                     gamePhase: 'game_over'
                 });
+                // Delete the room document after game over
+                await db.collection('rooms').doc(roomId).delete();
                 return; // Stop here, game is over
             }
 
@@ -499,11 +477,9 @@ const App = () => {
                 ...s,
                 revealed: s.text === currentSecret.text && s.ownerId === currentSecret.ownerId
             }));
-            console.log('Updated secrets with current revealed:', updatedSecrets); // Debug log
 
             // Select a random unrevealed secret from the UPDATED secrets array
             const nextSecretToReveal = selectRandomUnrevealedSecret(updatedSecrets);
-            console.log('Selected next secret:', nextSecretToReveal); // Debug log
 
             // Note: selectRandomUnrevealedSecret already handles the case where there are no unrevealed secrets
             // but we added an explicit check above for clarity and safety.
@@ -513,6 +489,8 @@ const App = () => {
                  await db.collection('rooms').doc(roomId).update({
                     gamePhase: 'game_over'
                  });
+                 // Delete the room document after game over
+                 await db.collection('rooms').doc(roomId).delete();
                  return;
             }
 
@@ -527,12 +505,6 @@ const App = () => {
 
             // Update the revealed status for the next secret
             updatedSecrets[secretIndex] = { ...updatedSecrets[secretIndex], revealed: true };
-
-            console.log('Starting next round with:', { // Debug log
-                secret: nextSecretToReveal,
-                updatedSecrets,
-                currentRound: currentRound + 1
-            });
 
             // First reset all players' voting status
             const playersSnap = await db.collection('rooms').doc(roomId).collection('players').get();
@@ -561,8 +533,6 @@ const App = () => {
     const amIHost = () => {
         const me = players.find(p => p.id === playerId);
         const isHost = !!(me && me.isHost);
-        // Debug log
-        // console.log('amIHost?', { playerId, players, isHost });
         return isHost;
     };
 
@@ -602,7 +572,6 @@ const App = () => {
                         <form className="w-full max-w-md mb-6" onSubmit={e => {
                             e.preventDefault();
                             const roomNameInput = e.target.elements[0];
-                            console.log('Create room form submitted:', roomNameInput.value); // Debug log
                             createRoom(roomNameInput.value);
                         }}>
                             <input
@@ -624,7 +593,6 @@ const App = () => {
                             e.preventDefault();
                             const roomCodeInput = e.target.elements[0];
                             const code = roomCodeInput.value.trim().toUpperCase();
-                            console.log('Join room form submitted:', code); // Debug log
                             joinRoomByCode(code);
                         }}>
                             <input
