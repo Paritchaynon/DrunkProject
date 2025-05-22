@@ -110,13 +110,13 @@ const VotingPhase = ({ secret, players, onVote, onBack, bigSecret }) => {
     const [submitted, setSubmitted] = React.useState(false);
     const handleSubmit = (e) => {
         e.preventDefault();
-        if (selectedPlayerId) {
+        if (selectedPlayerId && !submitted) {
             onVote(selectedPlayerId);
             setSubmitted(true);
         }
     };
     return (
-        <div className="container animate__animated animate__fadeIn">
+        <div className="container animate__animated animate__fadeIn voting-phase">
             <button onClick={onBack} className="hub-button">🏠</button>
             <div className="title-container">
                 <h1 className="game-title">ทายความลับ</h1>
@@ -134,8 +134,14 @@ const VotingPhase = ({ secret, players, onVote, onBack, bigSecret }) => {
                             onClick={() => !submitted && setSelectedPlayerId(player.id)}
                             style={{ pointerEvents: submitted ? 'none' : 'auto', opacity: submitted && selectedPlayerId !== player.id ? 0.5 : 1 }}
                         >
-                            <span className="player-icon">👤</span>
-                            <span>{player.name}</span>
+                             <span className="player-icon">👤</span>
+                             <span>{player.name}</span>
+                             {/* Voting status indicator */}
+                             {player.hasVoted ? (
+                                 <span style={{ marginLeft: '5px', color: '#10B981' }}>✅</span> // Voted
+                             ) : (
+                                 <span style={{ marginLeft: '5px', color: '#EF4444' }}>🕒</span> // Not Voted
+                             )}
                         </div>
                     ))}
                 </div>

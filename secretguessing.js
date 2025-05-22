@@ -23,6 +23,181 @@ const generateRoomCode = () => {
     return code;
 };
 
+// Game Components
+const Lobby = ({ onJoinRoom, onCreateRoom }) => (
+    <div className="setup-container animate__animated animate__fadeIn">
+        <button onClick={() => window.location.href = 'index.html'} className="hub-button">🏠</button>
+        <div className="container">
+            <div className="title-container">
+                <h1 className="game-title">Secret Guessing Game</h1>
+                <div className="game-subtitle">วงเหล้า Edition</div>
+            </div>
+            <div className="game-rules">
+                <h3>📜 กติกา</h3>
+                <ul>
+                    <li>🎯 ผู้เล่นจะต้องทายความลับของเพื่อน</li>
+                </ul>
+            </div>
+            <form className="input-group" onSubmit={onCreateRoom}>
+                <input type="text" placeholder="ตั้งชื่อห้อง (เช่น แม่กำปอง)" className="form-input" maxLength="30" />
+                <button type="submit" className="start-button">🎮 สร้างห้องใหม่</button>
+            </form>
+            <form className="input-group" onSubmit={onJoinRoom}>
+                <input type="text" placeholder="รหัสห้อง (เช่น ABC123)" className="form-input" maxLength="6" style={{ textTransform: 'uppercase' }} required />
+                <button type="submit" className="start-button">🔗 เข้าร่วมห้อง</button>
+            </form>
+            <div className="room-list-container" style={{ textAlign: 'center' }}>
+                <div className="room-list-header">ห้องที่เปิดอยู่</div>
+                <button className="start-button" style={{marginBottom: '10px'}} onClick={fetchRoomList}>รีเฟรช</button>
+                {isLoading && <div className="game-subtitle">กำลังโหลด...</div>}
+                {!isLoading && roomList.length === 0 && <div className="game-subtitle">ไม่มีห้องที่เปิดอยู่</div>}
+                {!isLoading && roomList.length > 0 && (
+                    <ul className="room-list" style={{ display: 'inline-block', textAlign: 'left', margin: '0 auto' }}>
+                        {roomList.map(room => (
+                            <li key={room.id} className="room-list-item" style={{ margin: '0 auto', maxWidth: 350 }}>
+                                <span>
+                                    {room.name || '(ไม่มีชื่อห้อง)'}
+                                    <span style={{ color: '#6b7280', fontSize: '0.95em', marginLeft: 8 }}>
+                                        ({room.code || room.id})
+                                    </span>
+                                </span>
+                                <button className="choice-btn" onClick={() => onJoinRoom(room.code || room.id)}>เข้าร่วม</button>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
+        </div>
+    </div>
+);
+
+const RoomCodeInput = ({ onSubmit, onBack }) => (
+    <div className="setup-container animate__animated animate__fadeIn">
+        <button onClick={onBack} className="hub-button">🏠</button>
+        <div className="container">
+            <div className="title-container">
+                <h1 className="game-title">ใส่ชื่อของคุณ</h1>
+            </div>
+            <form className="input-group" onSubmit={onSubmit}>
+                <input type="text" placeholder="ชื่อของคุณ" className="form-input" maxLength="30" required />
+                <button type="submit" className="start-button">เข้าร่วมเกม</button>
+            </form>
+        </div>
+    </div>
+);
+
+const PlayerList = ({ players }) => (
+    <div className="player-list-container">
+        <div className="player-list-header">
+            <strong>👥 ผู้เล่น ({players.length})</strong>
+        </div>
+        <div className="player-list">
+            <ul className="player-order-list">
+                {players.map(player => (
+                    <li key={player.id} className="player-item">
+                        <span className="player-status"></span>
+                        <span>{player.name}</span>
+                    </li>
+                ))}
+            </ul>
+        </div>
+    </div>
+);
+
+const SecretSubmission = ({ onSubmit, onBack }) => (
+    <div className="container animate__animated animate__fadeIn">
+        <div className="title-container">
+            <h1 className="game-title">ส่งความลับ</h1>
+        </div>
+        <form onSubmit={onSubmit} className="input-group">
+            <input type="text" placeholder="ความลับ" className="form-input" required />
+            <button type="submit" className="start-button">ส่งความลับ</button>
+        </form>
+    </div>
+);
+
+const VotingPhase = ({ secret, players, onVote, onBack, bigSecret }) => {
+    const [selectedPlayerId, setSelectedPlayerId] = React.useState(null);
+    const [submitted, setSubmitted] = React.useState(false);
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        if (selectedPlayerId && !submitted) {
+            onVote(selectedPlayerId);
+            setSubmitted(true);
+        }
+    };
+    return (
+        <div className="container animate__animated animate__fadeIn voting-phase">
+            <div className="title-container">
+                <h1 className="game-title">ทายความลับ</h1>
+                <div className="game-subtitle">ใครเป็นเจ้าของความลับนี้?</div>
+            </div>
+            <div className="question-display animate__animated animate__fadeIn">
+                <div className={bigSecret ? "question-text big-secret" : "question-text"}>{secret}</div>
+            </div>
+            <form onSubmit={handleSubmit}>
+                <div className="player-carousel" style={{ justifyContent: 'center' }}>
+                    {players.map(player => (
+                        <div
+                            key={player.id}
+                            className={`player-card${selectedPlayerId === player.id ? ' selected animate__animated animate__pulse' : ''}`}
+                            onClick={() => !submitted && setSelectedPlayerId(player.id)}
+                            style={{ pointerEvents: submitted ? 'none' : 'auto', opacity: submitted && selectedPlayerId !== player.id ? 0.5 : 1 }}
+                        >
+                             <span className="player-icon">👤</span>
+                             <span>{player.name}</span>
+                             {/* Voting status indicator */}
+                             {player.hasVoted ? (
+                                 <span style={{ marginLeft: '5px', color: '#10B981' }}>✅</span> // Voted
+                             ) : (
+                                 <span style={{ marginLeft: '5px', color: '#EF4444' }}>🕒</span> // Not Voted
+                             )}
+                        </div>
+                    ))}
+                </div>
+                <button type="submit" className="start-button" disabled={!selectedPlayerId || submitted}>
+                    {submitted ? 'ส่งคำตอบแล้ว!' : 'ส่งคำตอบ'}
+                </button>
+            </form>
+        </div>
+    );
+};
+
+const ResultsPhase = ({ secret, votes, players, onBack, bigSecret }) => {
+    const voteCounts = players.reduce((acc, player) => {
+        acc[player.id] = Object.values(votes).filter(v => v === player.id).length;
+        return acc;
+    }, {});
+    return (
+        <div className="container animate__animated animate__fadeIn">
+            <div className="title-container">
+                <h1 className="game-title">ผลการทาย</h1>
+            </div>
+            <div className="question-display animate__animated animate__fadeIn">
+                <div className={bigSecret ? "question-text big-secret" : "question-text"}>{secret}</div>
+                <div className="results-container">
+                    {players.map(player => (
+                        <div key={player.id} className="result-item animate__animated animate__fadeIn">
+                            <span>👤 {player.name}</span>
+                            <span className="font-bold">🎯 {voteCounts[player.id] || 0} โหวต</span>
+                        </div>
+                    ))}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+// Export components
+window.SecretComponents = {
+    Lobby,
+    RoomCodeInput,
+    PlayerList,
+    SecretSubmission,
+    VotingPhase,
+    ResultsPhase
+};
+
 // Main App Component
 const App = () => {
     const [view, setView] = React.useState('lobby');
@@ -568,29 +743,39 @@ const App = () => {
         </ul>
     );
 
-    const renderPlayerList = () => (
-        <div className="player-list-container">
-          <div className="player-list-header">
-            <strong>👥 ผู้เล่น ({players.length})</strong>
-          </div>
-          <div className="player-list">
-            <ul className="player-order-list">
-              {players.map(player => (
-                <li key={player.id} className="player-item">
-                  <span className="player-status"></span>
-                  <span>{player.name}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      );
+    // Helper: render player list (only in lobby view)
+    const renderPlayerList = () => {
+        if (gamePhase === 'lobby') {
+            return (
+                <div className="player-list-container">
+                  <div className="player-list-header">
+                    <strong>👥 ผู้เล่น ({players.length})</strong>
+                  </div>
+                  <div className="player-list">
+                    <ul className="player-order-list">
+                      {players.map(player => (
+                        <li key={player.id} className="player-item">
+                          <span className="player-status"></span>
+                          <span>{player.name}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                </div>
+              );
+        } else {
+            return null; // Hide player list in other phases
+        }
+      };
       
     // Main render function
     const renderView = () => {
+        // Render the hub button is now handled directly in components
+
         if (view === 'lobby') {
             return (
-                <div className="container animate__animated animate__fadeIn">
+                <div className="container animate__animated animate__fadeIn view-lobby">
+                    {/* Hub button is now in Lobby component */}
                     <div className="title-container">
                         <h1 className="game-title">Secret Guessing Game</h1>
                         <div className="game-subtitle">วงเหล้า Edition</div>
@@ -635,7 +820,8 @@ const App = () => {
         }
         if (view === 'enterName') {
             return (
-                <div className="container animate__animated animate__fadeIn">
+                <div className="container animate__animated animate__fadeIn view-enterName">
+                     {/* Hub button is now in RoomCodeInput component */}
                     <div className="title-container">
                         <h1 className="game-title">ใส่ชื่อของคุณ</h1>
                     </div>
@@ -648,7 +834,8 @@ const App = () => {
         }
         if ((view === 'waiting' || view === 'submitted') && roomName) {
             return (
-                <div className="container animate__animated animate__fadeIn">
+                <div className="container animate__animated animate__fadeIn view-waiting">
+                    <button onClick={() => window.location.href = 'index.html'} className="hub-button">🏠</button>
                     <div className="title-container">
                         <h1 className="game-title">{roomName}</h1>
                         <div className="game-subtitle">
@@ -724,12 +911,21 @@ const App = () => {
     const leaveRoom = async () => {
         try {
             if (roomId && playerId) {
-                await db.collection('rooms').doc(roomId).collection('players').doc(playerId).delete();
+                const playerRef = db.collection('rooms').doc(roomId).collection('players').doc(playerId);
+                await playerRef.delete();
+
+                // After deleting the player, check if the room is empty
+                const playersSnap = await db.collection('rooms').doc(roomId).collection('players').get();
+                if (playersSnap.empty) {
+                    console.log(`Room ${roomId} is empty, deleting room document.`);
+                    await db.collection('rooms').doc(roomId).delete();
+                }
             }
         } catch (e) {
-            // Ignore errors
+            // Ignore errors (e.g., room or player already deleted)
+            console.warn('Error during leaveRoom cleanup:', e);
         }
-        // Clean up local state and storage
+        // Clean up local state and storage regardless of Firebase operations
         if (roomListener) roomListener();
         if (playersListener) playersListener();
         setRoomId('');
@@ -744,7 +940,12 @@ const App = () => {
     };
 
     // Render the app
-    return renderView();
+    return (
+        <>
+            <button onClick={() => window.location.href = 'index.html'} className="hub-button">🏠</button>
+            {renderView()}
+        </>
+    );
 };
 
 // Render the app
