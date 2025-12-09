@@ -1,6 +1,6 @@
 // Firebase configuration
 const firebaseConfig = {
-    apiKey: "AIzaSyBaUeaE0UqeqXbmN1BXkdZGitVv5q__8Wo",
+    apiKey: "",
     authDomain: "secret-guessing-game.firebaseapp.com",
     projectId: "secret-guessing-game",
     storageBucket: "secret-guessing-game.firebasestorage.app",
