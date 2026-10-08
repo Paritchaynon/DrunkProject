@@ -1,50 +1,77 @@
 let statements = [];
 let currentIntensity = 'mild';
+let currentIndex = 0;
 
 // Initialize the game when the page loads
-window.onload = function() {
-    initializeGame();
-};
+window.addEventListener('DOMContentLoaded', () => {
+    const intensitySelect = document.getElementById('intensitySelect');
+    if (intensitySelect) {
+        currentIntensity = intensitySelect.value;
+    }
+});
 
 function goToHub() {
     window.location.href = 'index.html';
 }
 
 function startGame() {
-    document.querySelector('.hub-button').style.display = 'none';
-    setupScreen.style.display = 'none';
-    gameScreen.style.display = 'block';
-    currentIntensity = document.getElementById('intensitySelect').value;
-    statements = [...neverQuestions[currentIntensity]];
-    shuffleArray(statements);
-    
+    const hubBtn = document.querySelector('.hub-button');
+    if (hubBtn) hubBtn.style.display = 'none';
+
+    const setupScreen = document.getElementById('setupScreen');
+    const gameScreen = document.getElementById('gameScreen');
+    const intensitySelect = document.getElementById('intensitySelect');
+
+    if (setupScreen) setupScreen.style.display = 'none';
+    if (gameScreen) gameScreen.style.display = 'block';
+
+    if (intensitySelect) {
+        currentIntensity = intensitySelect.value;
+    }
+
+    if (typeof neverQuestions !== 'undefined' && neverQuestions[currentIntensity]) {
+        statements = [...neverQuestions[currentIntensity]];
+        shuffleArray(statements);
+    } else {
+        statements = ['ไม่เคยเล่นเกมนี้มาก่อน'];
+    }
+
+    currentIndex = 0;
     updateIntensityButton();
-    updateGameDisplay();
-    nextQuestion();
+    showCurrentStatement();
 }
 
 function backToMenu() {
-    document.querySelector('.hub-button').style.display = 'flex';
-    gameScreen.style.display = 'none';
-    setupScreen.style.display = 'flex';
+    const hubBtn = document.querySelector('.hub-button');
+    if (hubBtn) hubBtn.style.display = 'flex';
+
+    const setupScreen = document.getElementById('setupScreen');
+    const gameScreen = document.getElementById('gameScreen');
+
+    if (gameScreen) gameScreen.style.display = 'none';
+    if (setupScreen) setupScreen.style.display = 'flex';
 }
 
 function changeIntensity() {
     const intensities = ['mild', 'medium', 'extreme'];
     const emojis = ['😇 เบา', '😈 ปานกลาง', '🔥 แรง'];
-    const currentIndex = intensities.indexOf(currentIntensity);
-    const nextIndex = (currentIndex + 1) % intensities.length;
+    const currentIdx = intensities.indexOf(currentIntensity);
+    const nextIdx = (currentIdx + 1) % intensities.length;
     
-    currentIntensity = intensities[nextIndex];
-    statements = [...neverQuestions[currentIntensity]];
-    shuffleArray(statements);
+    currentIntensity = intensities[nextIdx];
+    if (typeof neverQuestions !== 'undefined' && neverQuestions[currentIntensity]) {
+        statements = [...neverQuestions[currentIntensity]];
+        shuffleArray(statements);
+    }
+    currentIndex = 0;
     
-    updateIntensityButton(emojis[nextIndex]);
-    updateGameDisplay();
+    updateIntensityButton(emojis[nextIdx]);
+    showCurrentStatement();
 }
 
 function updateIntensityButton(text) {
     const button = document.getElementById('currentIntensity');
+    if (!button) return;
     const intensityEmojis = {
         'mild': '😇 เบา',
         'medium': '😈 ปานกลาง',
@@ -53,33 +80,30 @@ function updateIntensityButton(text) {
     button.textContent = text || intensityEmojis[currentIntensity];
 }
 
-function updateGameDisplay() {
-    const statement = statements[0];
+function showCurrentStatement() {
+    if (statements.length === 0) return;
+    const statement = statements[currentIndex];
     const neverStatement = document.getElementById('neverStatement');
+    if (!neverStatement) return;
     
-    // Remove previous animation classes
     neverStatement.classList.remove('animate__fadeIn', 'animate__fadeOut');
-    
-    // Add fade out animation
     neverStatement.classList.add('animate__fadeOut');
     
-    // Update text and add fade in animation after a short delay
     setTimeout(() => {
         neverStatement.textContent = statement;
         neverStatement.classList.remove('animate__fadeOut');
         neverStatement.classList.add('animate__fadeIn');
-    }, 300);
+    }, 200);
 }
 
 function nextQuestion() {
-    statements.shift();
-    
-    if (statements.length === 0) {
-        statements = [...neverQuestions[currentIntensity]];
+    if (statements.length === 0) return;
+    currentIndex++;
+    if (currentIndex >= statements.length) {
         shuffleArray(statements);
+        currentIndex = 0;
     }
-    
-    updateGameDisplay();
+    showCurrentStatement();
 }
 
 function shuffleArray(array) {
@@ -87,4 +111,4 @@ function shuffleArray(array) {
         const j = Math.floor(Math.random() * (i + 1));
         [array[i], array[j]] = [array[j], array[i]];
     }
-} 
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>I'M NOT DRUNK (ยังไม่เมา!) - การ์ดวงเหล้าวัดใจ</title>
+  
+  <meta name="description" content="เกมเปิดการ์ดวงเหล้าวัดใจ สไตล์ I'M NOT DRUNK ภารกิจปาร์ตี้สุดมันส์ ถ้าทำรอด ไม่ทำดื่ม!">
+  
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  
+  <!-- Google Fonts & Animate.css -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="imnotdrunk-styles.css">
+</head>
+<body>
+  <!-- Ambient background glowing orbs -->
+  <div class="bg-glow">
+    <div class="glow-orb glow-orb-1"></div>
+    <div class="glow-orb glow-orb-2"></div>
+  </div>
+
+  <!-- Header Bar -->
+  <header class="app-header">
+    <a href="index.html" class="header-btn" title="กลับหน้าหลัก">🏠</a>
+    <div class="header-controls">
+      <button class="header-btn" id="soundToggleBtn" onclick="toggleSound()" title="เปิด/ปิดเสียง">🔊</button>
+      <button class="header-btn" onclick="openStatsModal()" title="ดูสถิติการดื่ม">📊</button>
+    </div>
+  </header>
+
+  <!-- ==================== SETUP SCREEN ==================== -->
+  <main class="setup-container animate__animated animate__fadeIn" id="setupScreen">
+    <div class="party-panel">
+      <div class="logo-header">
+        <div class="game-logo-badge">🃏 DRINKING CARD GAME</div>
+        <h1 class="main-title">I'M NOT DRUNK</h1>
+        <div class="sub-title">การ์ดวงเหล้าวัดใจ • ปาร์ตี้ Edition 🍻</div>
+      </div>
+
+      <!-- Mode Selection Tabs -->
+      <label class="form-label">โหมดการเล่น:</label>
+      <div class="mode-tabs">
+        <button type="button" class="mode-tab active" data-mode="circle">
+          🍻 วงเหล้าเปิดรวม
+        </button>
+        <button type="button" class="mode-tab" data-mode="players">
+          👥 สลับตาผู้เล่น
+        </button>
+      </div>
+
+      <!-- Player Input (Visible in players mode) -->
+      <div id="playerSetupBox" class="player-setup-box" style="display: none;">
+        <label class="form-label">รายชื่อเพื่อนในวง:</label>
+        <div class="input-row">
+          <input type="text" id="playerInput" class="party-input" placeholder="พิมพ์ชื่อแล้วกดเพิ่ม..." maxlength="20">
+          <button type="button" class="btn-add" onclick="addPlayer()">➕ เพิ่ม</button>
+        </div>
+        <div class="player-tags" id="playerTags"></div>
+      </div>
+
+      <!-- Category Filter Chips -->
+      <label class="form-label">เลือกหมวดการ์ด:</label>
+      <div class="category-chips">
+        <button type="button" class="chip active" data-cat="all">🌟 รวมทุกหมวด</button>
+        <button type="button" class="chip" data-cat="challenge">⚡ ภารกิจวัดใจ</button>
+        <button type="button" class="chip" data-cat="target">🎯 ชี้เป้าแจกเหล้า</button>
+        <button type="button" class="chip" data-cat="rule">👑 กฎประจำวง</button>
+        <button type="button" class="chip" data-cat="group">🍻 ดื่มทุกคน</button>
+        <button type="button" class="chip" data-cat="minigame">🎲 มินิเกมด่วน</button>
+        <button type="button" class="chip" data-cat="spicy">😈 18+ เผ็ชๆ</button>
+      </div>
+
+      <!-- Start Button -->
+      <button type="button" class="btn-start-party animate__animated animate__pulse animate__infinite" onclick="startGame()">
+        🚀 เริ่มเปิดการ์ดกันเลย!
+      </button>
+    </div>
+  </main>
+
+  <!-- ==================== GAME SCREEN ==================== -->
+  <main class="game-container animate__animated animate__fadeIn" id="gameScreen">
+    <!-- Current Turn Banner -->
+    <div class="turn-banner">
+      <div class="turn-player">
+        <div class="player-avatar">🍺</div>
+        <span class="turn-name" id="currentTurnName">วงเหล้าเปิดการ์ด</span>
+      </div>
+      <div class="card-counter" id="cardCounter">ใบที่ #1</div>
+    </div>
+
+    <!-- 3D Flip Card Container -->
+    <div class="card-scene">
+      <div class="flip-card" id="flipCard" onclick="flipCurrentCard()">
+        <!-- BACK FACE (Hidden card) -->
+        <div class="card-face card-back">
+          <div class="back-art">🍻</div>
+          <div class="back-logo">I'M NOT DRUNK</div>
+          <p style="color: var(--text-muted); font-size: 0.95rem;">ถ้าทำจะรอด • ไม่ทำดื่ม!</p>
+          <div class="tap-to-open">👆 แตะเพื่อเปิดการ์ด</div>
+        </div>
+
+        <!-- FRONT FACE (Revealed card) -->
+        <div class="card-face card-front theme-challenge" id="cardFrontFace">
+          <div class="card-top-bar">
+            <span class="category-badge" id="cardCategoryBadge">⚡ ภารกิจวัดใจ</span>
+            <span class="card-badge-pill" id="cardBadgePill">วัดใจ</span>
+          </div>
+
+          <div class="card-body-content">
+            <h2 class="card-headline" id="cardHeadline">สายตาพิฆาต</h2>
+            <p class="card-instruction" id="cardInstruction">
+              จ้องตาคนที่นั่งตรงข้ามเป็นเวลา 15 วินาทีโดยห้ามยิ้มหรือหัวเราะเด็ดขาด!
+            </p>
+          </div>
+
+          <!-- Conditions -->
+          <div class="condition-boxes">
+            <div class="cond-box cond-survive">
+              <span class="cond-icon">🛡️</span>
+              <div>
+                <strong class="cond-title">ถ้าทำได้:</strong>
+                <span id="cardSurviveText">รอด! (ไม่ต้องดื่ม)</span>
+              </div>
+            </div>
+
+            <div class="cond-box cond-penalty">
+              <span class="cond-icon">🍺</span>
+              <div>
+                <strong class="cond-title">ถ้าไม่ทำ / ไม่รอด:</strong>
+                <span id="cardPenaltyText">ดื่ม 1 ช็อต</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Action Controls -->
+    <div class="game-actions">
+      <button type="button" class="btn-action btn-survive" onclick="handleSurvive()">
+        ✅ ทำสำเร็จ (รอด!)
+      </button>
+      <button type="button" class="btn-action btn-drink" onclick="handleDrink()">
+        🍺 ไม่ทำ (ยอมดื่ม)
+      </button>
+      <button type="button" class="btn-action btn-next-card" onclick="handleNextCard()">
+        ➡️ การ์ดใบถัดไป (Next)
+      </button>
+    </div>
+
+    <!-- Tally Bar -->
+    <div class="tally-bar">
+      <div>
+        <div class="tally-item-label">เปิดไปแล้ว</div>
+        <div class="tally-item-val" id="tallyCards">0</div>
+      </div>
+      <div>
+        <div class="tally-item-label">ดื่มสะสมในวง</div>
+        <div class="tally-item-val" id="tallyDrinks">0 ช็อต</div>
+      </div>
+      <div>
+        <button onclick="backToSetup()" style="background: none; border: none; color: #a0aec0; cursor: pointer; font-size: 0.85rem; font-family: inherit; margin-top: 5px;">
+          ⚙️ ปรับตั้งค่า
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- ==================== STATS MODAL ==================== -->
+  <div class="modal-overlay" id="statsModal" onclick="if(event.target === this) closeStatsModal()">
+    <div class="modal-content animate__animated animate__zoomIn">
+      <div class="modal-header">
+        <h3 class="modal-title">📊 สถิติวงเหล้าคืนนี้</h3>
+        <button class="modal-close" onclick="closeStatsModal()">✕</button>
+      </div>
+      <div class="stats-list" id="statsList"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="party-toast" id="partyToast">ยินดีต้อนรับสู่ปาร์ตี้!</div>
+
+  <!-- Scripts -->
+  <script src="questions/cards.js"></script>
+  <script src="imnotdrunk.js"></script>
+</body>
+</html>

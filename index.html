@@ -3,99 +3,122 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Party Games Hub - วงเหล้า</title>
+    <title>Party Games Hub - วงเหล้า Edition</title>
+    <meta name="description" content="ศูนย์รวมเกมวงเหล้าสุดฮิต Truth or Dare, Never Have I Ever, Would You Rather, และเกมการ์ด I'M NOT DRUNK">
     
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
     
-    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        .fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+    <!-- Google Fonts & Animate.css -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    
     <link rel="stylesheet" href="hub-styles.css">
 </head>
 <body>
     <div class="setup-container">
-        <div class="container">
-            <div class="title-container fade-in">
+        <div class="container animate__animated animate__fadeIn">
+            <div class="title-container">
+                <div class="hub-badge">🍻 PARTY HUB</div>
                 <h1 class="game-title">Party Games Hub</h1>
                 <div class="game-subtitle">วงเหล้า Edition</div>
-        </div>
+            </div>
 
-        <div class="games-grid">
-            <!-- Truth or Dare Card -->
-                <a href="truthordare.html" class="game-card fade-in">
-                <div class="game-icon">🎯</div>
-                <h2>Truth or Dare</h2>
-                <p>เกมจริงหรือกล้า สำหรับปาร์ตี้สุดมันส์!</p>
-                <div class="player-count">2-20 Players</div>
-                <div class="game-tag">Most Popular</div>
-            </a>
+            <div class="games-grid">
+                <!-- NEW FEATURED GAME: I'M NOT DRUNK Card Game -->
+                <a href="imnotdrunk.html" class="game-card featured-card">
+                    <div class="game-icon">🃏</div>
+                    <h2>I'M NOT DRUNK</h2>
+                    <p>เกมเปิดการ์ดวงเหล้าวัดใจ! ทำกิจกรรม ถ้าทำรอด ไม่ทำดื่ม!</p>
+                    <div class="player-count">2-30 Players</div>
+                    <div class="game-tag tag-hot">🔥 Hot & New!</div>
+                </a>
 
-            <!-- Never Have I Ever Card -->
-                <a href="neverhaveiever.html" class="game-card fade-in">
-                <div class="game-icon">🍻</div>
-                <h2>Never Have I Ever</h2>
-                <p>เกมฉันไม่เคย... ใครเคยต้องดื่ม!</p>
-                <div class="player-count">3-15 Players</div>
-                    <div class="game-tag">New!</div>
+                <!-- Truth or Dare Card -->
+                <a href="truthordare.html" class="game-card">
+                    <div class="game-icon">🎯</div>
+                    <h2>Truth or Dare</h2>
+                    <p>เกมจริงหรือกล้า ปลดล็อคความลับและคำท้าสุดแสบ!</p>
+                    <div class="player-count">2-20 Players</div>
+                    <div class="game-tag tag-popular">Most Popular</div>
+                </a>
+
+                <!-- Never Have I Ever Card -->
+                <a href="neverhaveiever.html" class="game-card">
+                    <div class="game-icon">🍻</div>
+                    <h2>Never Have I Ever</h2>
+                    <p>เกมฉันไม่เคย... ใครเคยทำสิ่งนี้ต้องดื่มหมดแก้ว!</p>
+                    <div class="player-count">3-15 Players</div>
+                    <div class="game-tag tag-new">Party Classic</div>
                 </a>
 
                 <!-- Would You Rather Card -->
-                <a href="wouldyourather.html" class="game-card fade-in">
+                <a href="wouldyourather.html" class="game-card">
                     <div class="game-icon">🤔</div>
                     <h2>Would You Rather</h2>
-                    <p>เลือกอย่างไหน ระหว่าง 2 ทางเลือกสุดป่วง!</p>
+                    <p>เลือกอย่างไหน ระหว่าง 2 ทางเลือกสุดป่วง ไม่ตอบดื่ม 2 เท่า!</p>
                     <div class="player-count">2-30 Players</div>
-                    <div class="game-tag">New!</div>
+                    <div class="game-tag tag-new">Hilarious</div>
                 </a>
 
-                <!-- Secret Guessing Game Card -->
-                <a href="secretguessing.html" class="game-card fade-in">
+                <!-- Secret Guessing Game Card (Under Development) -->
+                <a href="secretguessing.html" class="game-card">
                     <div class="game-icon">🤫</div>
                     <h2>Secret Guessing</h2>
-                    <p>เกมทายความลับสุดฮา ทายว่าใครเป็นเจ้าของความลับ!</p>
+                    <p>เกมทายความลับ (ระบบห้องออนไลน์กำลังปรับปรุงเซิร์ฟเวอร์)</p>
                     <div class="player-count">4-10 Players</div>
-                    <div class="game-tag">New!</div>
+                    <div class="game-tag tag-dev">🛠️ กำลังพัฒนา</div>
                 </a>
                 
-            <!-- Charades Card -->
-                <div class="game-card coming-soon fade-in">
-                <div class="game-icon">🎭</div>
-                <h2>Party Charades</h2>
-                <p>ทายคำใบ้ สุดฮา มันส์ทั้งปาร์ตี้!</p>
-                <div class="player-count">4-16 Players</div>
-                <div class="game-tag">Coming Soon</div>
-            </div>
+                <!-- Charades Card (Coming Soon) -->
+                <div class="game-card coming-soon" onclick="showDevToast('🎭 Party Charades (ทายคำใบ้)')">
+                    <div class="game-icon">🎭</div>
+                    <h2>Party Charades</h2>
+                    <p>ทายคำใบ้ สุดฮา มันส์ทั้งปาร์ตี้!</p>
+                    <div class="player-count">4-16 Players</div>
+                    <div class="game-tag">Coming Soon</div>
+                </div>
 
-            <!-- Word Association Card -->
-                <div class="game-card coming-soon fade-in">
-                <div class="game-icon">🔤</div>
-                <h2>Word Chain</h2>
-                <p>เกมต่อคำ จับเวลา สนุกได้ไม่รู้จบ!</p>
-                <div class="player-count">2-10 Players</div>
-                <div class="game-tag">Coming Soon</div>
-            </div>
+                <!-- Word Association Card (Coming Soon) -->
+                <div class="game-card coming-soon" onclick="showDevToast('🔤 Word Chain (เกมต่อคำ)')">
+                    <div class="game-icon">🔤</div>
+                    <h2>Word Chain</h2>
+                    <p>เกมต่อคำ จับเวลา สนุกได้ไม่รู้จบ!</p>
+                    <div class="player-count">2-10 Players</div>
+                    <div class="game-tag">Coming Soon</div>
+                </div>
 
-            <!-- Categories Card -->
-                <div class="game-card coming-soon fade-in">
-                <div class="game-icon">📝</div>
-                <h2>Speed Categories</h2>
-                <p>เกมจับหมวดหมู่ แข่งความเร็ว!</p>
-                <div class="player-count">3-8 Players</div>
-                <div class="game-tag">Coming Soon</div>
-            </div>
-
-            
+                <!-- Categories Card (Coming Soon) -->
+                <div class="game-card coming-soon" onclick="showDevToast('📝 Speed Categories (เกมจับหมวดหมู่)')">
+                    <div class="game-icon">📝</div>
+                    <h2>Speed Categories</h2>
+                    <p>เกมจับหมวดหมู่ แข่งความเร็ว!</p>
+                    <div class="player-count">3-8 Players</div>
+                    <div class="game-tag">Coming Soon</div>
+                </div>
             </div>
         </div>
     </div>
-    <div class="copyright">© 2025 Paritchayanon Chaita</div>
+
+    <!-- Hub Toast Notification -->
+    <div class="hub-toast" id="hubToast">🛠️ โหมดนี้อยู่ระหว่างการพัฒนา พบกันเร็วๆ นี้!</div>
+
+    <footer class="copyright">© 2025-2026 Paritchayanon Chaita • วงเหล้า Edition</footer>
+
+    <script>
+        let toastTimer = null;
+        function showDevToast(gameName) {
+            const toast = document.getElementById('hubToast');
+            if (!toast) return;
+            toast.textContent = `🛠️ ${gameName} อยู่ระหว่างการพัฒนา เตรียมพบกับความมันส์เร็วๆ นี้!`;
+            toast.classList.add('show');
+            if (toastTimer) clearTimeout(toastTimer);
+            toastTimer = setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+    </script>
 </body>
-</html> 
+</html>
