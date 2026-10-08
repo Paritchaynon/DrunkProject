@@ -104,7 +104,8 @@ const state = {
   players: [],
   currentPlayerIndex: 0,
   selectedCategory: 'all',
-  deck: [],
+  deck: [],        // ไพ่ที่ยังไม่ได้เล่น (shuffle แล้ว)
+  usedIds: new Set(), // ติดตาม id ที่เล่นไปแล้ว (no-repeat)
   currentCard: null,
   isFlipped: false,
   cardCount: 0,
@@ -245,6 +246,7 @@ function startGame() {
   }
 
   state.deck = shuffle([...availableCards]);
+  state.usedIds = new Set(); // รีเซ็ต tracking
   state.cardCount = 0;
   state.totalDrinks = 0;
   state.currentPlayerIndex = 0;
@@ -266,21 +268,54 @@ function backToSetup() {
 }
 
 // --- Card Drawing & Flipping ---
-function drawNextCard(advancePlayer = true) {
-  if (state.deck.length === 0) {
-    // Re-shuffle deck
-    const availableCards = typeof getFilteredCards === 'function' 
-      ? getFilteredCards(state.selectedCategory) 
-      : [...imNotDrunkCards];
-    state.deck = shuffle([...availableCards]);
-    showToast('สับการ์ดกองใหม่เรียบร้อย! 🃏');
+function buildFreshDeck() {
+  let availableCards = [];
+  if (typeof getFilteredCards === 'function') {
+    availableCards = getFilteredCards(state.selectedCategory);
+  } else if (typeof imNotDrunkCards !== 'undefined') {
+    availableCards = [...imNotDrunkCards];
   }
+  return shuffle([...availableCards]);
+}
+
+function drawNextCard(advancePlayer = true) {
+  // ถ้า deck หมด → สับใหม่ทั้งหมด รีเซ็ต usedIds ด้วย
+  if (state.deck.length === 0) {
+    state.deck = buildFreshDeck();
+    state.usedIds = new Set();
+    showToast('สับการ์ดกองใหม่เรียบร้อย! ไม่มีซ้ำรอบนี้ 🃏');
+  }
+
+  // กรองการ์ดที่เคยออกไปแล้วออกก่อน pop
+  // (กรณีที่ยังมีการ์ดเหลืออยู่แต่อาจซ้ำจากรอบก่อน)
+  let nextCard = null;
+  let attempts = 0;
+  while (state.deck.length > 0 && attempts < state.deck.length) {
+    const candidate = state.deck[state.deck.length - 1];
+    if (!state.usedIds.has(candidate.id)) {
+      nextCard = state.deck.pop();
+      break;
+    }
+    // ถ้าใบบนสุดซ้ำ เอามาใส่ก้นกอง
+    state.deck.unshift(state.deck.pop());
+    attempts++;
+  }
+
+  // ถ้าทุกใบซ้ำหมดแล้ว → สับใหม่
+  if (!nextCard) {
+    state.deck = buildFreshDeck();
+    state.usedIds = new Set();
+    nextCard = state.deck.pop();
+    showToast('เล่นครบทุกใบแล้ว! สับกองใหม่ให้ 🎊');
+  }
+
+  state.usedIds.add(nextCard.id); // บันทึกว่าใบนี้ออกไปแล้ว
 
   if (advancePlayer && state.gameMode === 'players' && state.players.length > 0) {
     state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
   }
 
-  state.currentCard = state.deck.pop();
+  state.currentCard = nextCard;
   state.cardCount++;
   state.hasDecidedCurrentCard = false;
 
@@ -413,6 +448,18 @@ function handleDrink() {
 }
 
 function handleNextCard() {
+  // บังคับให้เปิดการ์ดก่อนกดข้ามได้
+  if (!state.isFlipped) {
+    showToast('👆 แตะการ์ดเพื่อเปิดก่อนนะ!');
+    if (flipCardEl) {
+      // เขย่าการ์ดเพื่อให้รู้ว่ายังไม่ได้เปิด
+      flipCardEl.style.animation = 'none';
+      flipCardEl.offsetHeight; // reflow
+      flipCardEl.style.animation = 'shakeCard 0.4s ease';
+      setTimeout(() => { flipCardEl.style.animation = ''; }, 450);
+    }
+    return;
+  }
   sfx.playTap();
   drawNextCard(true);
 }

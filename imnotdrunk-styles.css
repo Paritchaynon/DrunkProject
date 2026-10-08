@@ -867,3 +867,14 @@ body {
     padding: 24px 18px;
   }
 }
+
+/* Shake animation when trying to skip without flipping */
+@keyframes shakeCard {
+  0%   { transform: translateX(0); }
+  15%  { transform: translateX(-8px) rotate(-1deg); }
+  30%  { transform: translateX(8px) rotate(1deg); }
+  45%  { transform: translateX(-6px); }
+  60%  { transform: translateX(6px); }
+  75%  { transform: translateX(-3px); }
+  100% { transform: translateX(0); }
+}
