@@ -232,21 +232,12 @@ function startGame() {
     return;
   }
 
-  // เตรียม Deck
-  let availableCards = [];
-  const isPlayers = state.gameMode === 'players' && state.players.length > 0;
-  if (typeof getFilteredCards === 'function') {
-    availableCards = getFilteredCards(state.selectedCategory, isPlayers);
-  } else if (typeof imNotDrunkCards !== 'undefined') {
-    availableCards = isPlayers ? [...imNotDrunkCards] : imNotDrunkCards.filter(c => !c.requiresPlayer);
-  }
-
-  if (availableCards.length === 0) {
+  state.deck = buildFreshDeck();
+  if (state.deck.length === 0) {
     showToast('ไม่มีการ์ดในหมวดที่เลือก!');
     return;
   }
 
-  state.deck = shuffle([...availableCards]);
   state.usedIds = new Set(); // รีเซ็ต tracking
   state.cardCount = 0;
   state.totalDrinks = 0;
@@ -268,7 +259,6 @@ function backToSetup() {
   if (flipCardEl) flipCardEl.classList.remove('is-flipped');
 }
 
-// --- Card Drawing & Flipping ---
 function buildFreshDeck() {
   let availableCards = [];
   const isPlayers = state.gameMode === 'players' && state.players.length > 0;
@@ -277,7 +267,17 @@ function buildFreshDeck() {
   } else if (typeof imNotDrunkCards !== 'undefined') {
     availableCards = isPlayers ? [...imNotDrunkCards] : imNotDrunkCards.filter(c => !c.requiresPlayer);
   }
-  return shuffle([...availableCards]);
+
+  // สำหรับการ์ดที่ตั้ง allowRepeat ให้ใส่เพิ่มในสำรับเพื่อให้มีโอกาสสุ่มได้ซ้ำเรื่อยๆ ในรอบเดียวกัน
+  const extraRepeatCards = availableCards.filter(c => c.allowRepeat);
+  let finalDeck = [...availableCards];
+  if (extraRepeatCards.length > 0) {
+    for (let i = 0; i < 3; i++) {
+      finalDeck.push(...extraRepeatCards);
+    }
+  }
+
+  return shuffle(finalDeck);
 }
 
 function escapeHtml(str) {
@@ -333,12 +333,12 @@ function drawNextCard(advancePlayer = true) {
     showToast('สับการ์ดกองใหม่เรียบร้อย! ไม่มีซ้ำรอบนี้ 🃏');
   }
 
-  // กรองการ์ดที่เคยออกไปแล้วออกก่อน pop
+  // กรองการ์ดที่เคยออกไปแล้วออกก่อน pop (ยกเว้นการ์ดที่ตั้ง allowRepeat: true)
   let nextCard = null;
   let attempts = 0;
   while (state.deck.length > 0 && attempts < state.deck.length) {
     const candidate = state.deck[state.deck.length - 1];
-    if (!state.usedIds.has(candidate.id)) {
+    if (candidate.allowRepeat || !state.usedIds.has(candidate.id)) {
       nextCard = state.deck.pop();
       break;
     }
@@ -354,7 +354,9 @@ function drawNextCard(advancePlayer = true) {
     showToast('เล่นครบทุกใบแล้ว! สับกองใหม่ให้ 🎊');
   }
 
-  state.usedIds.add(nextCard.id);
+  if (!nextCard.allowRepeat) {
+    state.usedIds.add(nextCard.id);
+  }
 
   if (advancePlayer && state.gameMode === 'players' && state.players.length > 0) {
     state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
