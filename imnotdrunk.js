@@ -234,10 +234,11 @@ function startGame() {
 
   // เตรียม Deck
   let availableCards = [];
+  const isPlayers = state.gameMode === 'players' && state.players.length > 0;
   if (typeof getFilteredCards === 'function') {
-    availableCards = getFilteredCards(state.selectedCategory);
+    availableCards = getFilteredCards(state.selectedCategory, isPlayers);
   } else if (typeof imNotDrunkCards !== 'undefined') {
-    availableCards = [...imNotDrunkCards];
+    availableCards = isPlayers ? [...imNotDrunkCards] : imNotDrunkCards.filter(c => !c.requiresPlayer);
   }
 
   if (availableCards.length === 0) {
@@ -270,12 +271,58 @@ function backToSetup() {
 // --- Card Drawing & Flipping ---
 function buildFreshDeck() {
   let availableCards = [];
+  const isPlayers = state.gameMode === 'players' && state.players.length > 0;
   if (typeof getFilteredCards === 'function') {
-    availableCards = getFilteredCards(state.selectedCategory);
+    availableCards = getFilteredCards(state.selectedCategory, isPlayers);
   } else if (typeof imNotDrunkCards !== 'undefined') {
-    availableCards = [...imNotDrunkCards];
+    availableCards = isPlayers ? [...imNotDrunkCards] : imNotDrunkCards.filter(c => !c.requiresPlayer);
   }
   return shuffle([...availableCards]);
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+function formatCardTextWithPlayers(text, currentPlayer, targetPlayer) {
+  if (!text) return '';
+  let formatted = escapeHtml(text);
+
+  const playerTag = currentPlayer 
+    ? `<span class="player-highlight">👤 ${escapeHtml(currentPlayer)}</span>` 
+    : '';
+  const targetTag = targetPlayer 
+    ? `<span class="player-highlight">🎯 ${escapeHtml(targetPlayer)}</span>` 
+    : '';
+
+  // 1. ถ้าการ์ดมี placeholder {player} หรือ {target} ให้แทนที่ตรงจุด
+  if (formatted.includes('{player}') || formatted.includes('{target}')) {
+    if (playerTag) formatted = formatted.replaceAll('{player}', playerTag);
+    if (targetTag) formatted = formatted.replaceAll('{target}', targetTag);
+    return formatted;
+  }
+
+  // 2. ถ้าเป็นการ์ดทั่วไปที่ไม่มี placeholder แต่เล่นโหมดใส่ชื่อ
+  // สุ่มประมาณ 35% ของการ์ด ให้เจาะจงชื่อผู้เล่นชัดเจนไปเลย
+  if (currentPlayer && state.gameMode === 'players') {
+    // กำหนด deterministic นิดหน่อยจาก id เพื่อไม่ให้กระพริบเปลี่ยนไปเปลี่ยนมา
+    const shouldTarget = (state.cardCount % 3 === 0);
+    if (shouldTarget) {
+      if (targetPlayer && (formatted.startsWith('คุณ') || formatted.startsWith('สั่งใคร'))) {
+        formatted = `${playerTag} สั่ง ${targetTag}: ` + formatted.replace(/^(คุณ|สั่งใครก็ได้ในวง|เลือกเพื่อน 1 คน)/, '');
+      } else {
+        formatted = `${playerTag} : ` + formatted;
+      }
+    }
+  }
+
+  return formatted;
 }
 
 function drawNextCard(advancePlayer = true) {
@@ -287,7 +334,6 @@ function drawNextCard(advancePlayer = true) {
   }
 
   // กรองการ์ดที่เคยออกไปแล้วออกก่อน pop
-  // (กรณีที่ยังมีการ์ดเหลืออยู่แต่อาจซ้ำจากรอบก่อน)
   let nextCard = null;
   let attempts = 0;
   while (state.deck.length > 0 && attempts < state.deck.length) {
@@ -296,7 +342,6 @@ function drawNextCard(advancePlayer = true) {
       nextCard = state.deck.pop();
       break;
     }
-    // ถ้าใบบนสุดซ้ำ เอามาใส่ก้นกอง
     state.deck.unshift(state.deck.pop());
     attempts++;
   }
@@ -309,7 +354,7 @@ function drawNextCard(advancePlayer = true) {
     showToast('เล่นครบทุกใบแล้ว! สับกองใหม่ให้ 🎊');
   }
 
-  state.usedIds.add(nextCard.id); // บันทึกว่าใบนี้ออกไปแล้ว
+  state.usedIds.add(nextCard.id);
 
   if (advancePlayer && state.gameMode === 'players' && state.players.length > 0) {
     state.currentPlayerIndex = (state.currentPlayerIndex + 1) % state.players.length;
@@ -331,7 +376,7 @@ function drawNextCard(advancePlayer = true) {
 }
 
 function flipCurrentCard() {
-  if (state.isFlipped) return; // Already flipped
+  if (state.isFlipped) return;
   state.isFlipped = true;
   flipCardEl.classList.add('is-flipped');
   sfx.playFlip();
@@ -358,9 +403,26 @@ function populateCardFront(card) {
   catBadge.textContent = card.categoryName || '🃏 การ์ดวงเหล้า';
   badgePill.textContent = card.badge || 'ทั่วไป';
   headline.textContent = card.title;
-  instruction.textContent = card.text;
-  surviveText.textContent = card.survive;
-  penaltyText.textContent = card.penalty;
+
+  // คำนวณผู้เล่นปัจจุบัน และผู้เล่นเป้าหมาย
+  let currentPlayer = null;
+  let targetPlayer = null;
+
+  if (state.gameMode === 'players' && state.players.length > 0) {
+    currentPlayer = state.players[state.currentPlayerIndex];
+    if (state.players.length > 1) {
+      // สุ่มผู้เล่นเป้าหมายที่ไม่ใช่คนปัจจุบัน
+      const otherPlayers = state.players.filter(p => p !== currentPlayer);
+      targetPlayer = otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
+    } else {
+      targetPlayer = currentPlayer;
+    }
+  }
+
+  // แปลงข้อความพร้อมใส่ highlight ให้ชื่อผู้เล่น
+  instruction.innerHTML = formatCardTextWithPlayers(card.text, currentPlayer, targetPlayer);
+  surviveText.innerHTML = formatCardTextWithPlayers(card.survive, currentPlayer, targetPlayer);
+  penaltyText.innerHTML = formatCardTextWithPlayers(card.penalty, currentPlayer, targetPlayer);
 }
 
 function updateTurnDisplay() {

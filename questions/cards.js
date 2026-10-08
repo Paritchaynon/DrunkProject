@@ -684,13 +684,141 @@ const imNotDrunkCards = [
     penalty: "ไม่มีบทลงโทษในการ์ดใบนี้",
     shots: 0,
     badge: "โชคดีสุดๆ"
+  },
+  // ==========================================
+  // การ์ดระบุชื่อเพื่อนโดยเฉพาะ (PLAYER NAMES SPECIAL)
+  // ==========================================
+  {
+    id: 61,
+    title: "ภารกิจวัดใจสองเรา",
+    category: "challenge",
+    categoryName: "⚡ ภารกิจวัดใจ",
+    text: "{player} ต้องจ้องตากับ {target} 15 วินาทีโดยห้ามหลุดยิ้มหรือหัวเราะแม้แต่นิดเดียว!",
+    survive: "ถ้า {player} กลั้นขำได้: รอด!",
+    penalty: "ถ้าใครหลุดยิ้มก่อน: คนนั้นดื่ม 1 ช็อต",
+    shots: 1,
+    badge: "คู่ดวล",
+    requiresPlayer: true
+  },
+  {
+    id: 62,
+    title: "ชี้เป้าสั่งดื่ม!",
+    category: "target",
+    categoryName: "🎯 ชี้เป้าแจกเหล้า",
+    text: "โชคชะตากำหนดให้ {player} มีสิทธิ์สั่ง {target} ดื่ม 1 ช็อตเต็มๆ ทันที!",
+    survive: "{player} รอดตัวแน่นอน",
+    penalty: "{target}: ดื่ม 1 ช็อตตามคำสั่ง",
+    shots: 1,
+    badge: "สั่งดื่ม",
+    requiresPlayer: true
+  },
+  {
+    id: 63,
+    title: "เปิดใจกระซิบรัก",
+    category: "spicy",
+    categoryName: "😈 18+ เผ็ชๆ ป่วนๆ",
+    text: "{player} ต้องบอกข้อดีหรือความในใจที่มีต่อ {target} 1 เรื่องที่ยังไม่เคยบอก",
+    survive: "ถ้าพูดออกมาจากใจจริง: รอด!",
+    penalty: "ถ้าเขินไม่ยอมพูด: {player} ดื่ม 1 ช็อต",
+    shots: 1,
+    badge: "สารภาพ",
+    requiresPlayer: true
+  },
+  {
+    id: 64,
+    title: "ดวลเป่ายิ้งฉุบมหาโหด",
+    category: "minigame",
+    categoryName: "🎲 มินิเกมด่วน",
+    text: "{player} ท้าดวลเป่ายิ้งฉุบกับ {target} ตัดสิน 2 ใน 3 ผู้แพ้ต้องดื่ม!",
+    survive: "คนชนะ: รอดตัว!",
+    penalty: "คนแพ้: ดื่ม 1 ช็อตเต็มๆ",
+    shots: 1,
+    badge: "ดวลตัวต่อตัว",
+    requiresPlayer: true
+  },
+  {
+    id: 65,
+    title: "บาริสต้าส่วนตัว",
+    category: "rule",
+    categoryName: "👑 กฎประจำวง",
+    text: "{player} ต้องรับหน้าที่เป็นเด็กชงเครื่องดื่มและบริการ {target} จนกว่าจะเปลี่ยนการ์ดใบใหม่!",
+    survive: "บริการประทับใจ: รอด!",
+    penalty: "ถ้าไม่ยอมบริการ: {player} ดื่ม 1 ช็อต",
+    shots: 1,
+    badge: "รับใช้",
+    requiresPlayer: true
+  },
+  {
+    id: 66,
+    title: "ภาพลับในมือถือ",
+    category: "challenge",
+    categoryName: "⚡ ภารกิจวัดใจ",
+    text: "{player} ต้องยอมให้ {target} เปิดดูอัลบั้มรูปล่าสุดในโทรศัพท์ 2 รูป!",
+    survive: "ถ้ายอมเปิดให้ดู: รอดตัว!",
+    penalty: "ถ้าใจไม่กล้าพอ: {player} ดื่มครึ่งแก้ว",
+    shots: 2,
+    badge: "ความลับ",
+    requiresPlayer: true
+  },
+  {
+    id: 67,
+    title: "ชนแก้วสมานฉันท์",
+    category: "target",
+    categoryName: "🎯 ชี้เป้าแจกเหล้า",
+    text: "{player} กับ {target} ชนแก้วคล้องแขนดื่มด้วยกันคนละครึ่งแก้วเพื่อกระชับสัมพันธ์!",
+    survive: "มิตรภาพเบ่งบาน",
+    penalty: "ดื่มทั้งคู่คนละครึ่งแก้ว",
+    shots: 2,
+    badge: "คล้องแขน",
+    requiresPlayer: true
+  },
+  {
+    id: 68,
+    title: "จำกัดคำพูด",
+    category: "rule",
+    categoryName: "👑 กฎประจำวง",
+    text: "{player} เวลาจะพูดอะไรต้องขออนุญาตจาก {target} ก่อนเสมอจนจบรอบนี้!",
+    survive: "ถ้าไม่ลืมขออนุญาต: รอด!",
+    penalty: "ถ้าเผลอพูดโดยไม่ขอ: {player} ดื่ม 1 ช็อต",
+    shots: 1,
+    badge: "ลูกน้อง",
+    requiresPlayer: true
+  },
+  {
+    id: 69,
+    title: "ความลับที่ไม่เคยบอก",
+    category: "spicy",
+    categoryName: "😈 18+ เผ็ชๆ ป่วนๆ",
+    text: "{player} ต้องตอบตามความจริงว่าครั้งแรกที่เจอ {target} รู้สึกหรือคิดอะไรอยู่?",
+    survive: "ถ้ากล้าเล่าความจริง: รอด!",
+    penalty: "ถ้าเงียบไม่ยอมตอบ: {player} ดื่ม 1 ช็อต",
+    shots: 1,
+    badge: "แวบแรก",
+    requiresPlayer: true
+  },
+  {
+    id: 70,
+    title: "การันตีมิตรภาพ",
+    category: "challenge",
+    categoryName: "⚡ ภารกิจวัดใจ",
+    text: "{target} สามารถสั่งให้ {player} ทำอะไรก็ได้ 1 อย่าง (ถ้าไม่เกินไป) หรือเลือกสั่งให้ดื่ม 1 ช็อต!",
+    survive: "ถ้า {player} ยอมทำตามคำสั่ง: รอด!",
+    penalty: "ถ้าปฏิเสธ: {player} ดื่ม 2 ช็อต",
+    shots: 2,
+    badge: "คำสั่งเด็ดขาด",
+    requiresPlayer: true
   }
 ];
 
 // ฟังก์ชันสุ่มการ์ดและกรองตามหมวดหมู่
-function getFilteredCards(category = 'all') {
-  if (category === 'all') {
-    return [...imNotDrunkCards];
+function getFilteredCards(category = 'all', isPlayersMode = false) {
+  let cards = imNotDrunkCards;
+  if (!isPlayersMode) {
+    cards = cards.filter(card => !card.requiresPlayer);
   }
-  return imNotDrunkCards.filter(card => card.category === category);
+  if (category === 'all') {
+    return [...cards];
+  }
+  return cards.filter(card => card.category === category);
 }
+
