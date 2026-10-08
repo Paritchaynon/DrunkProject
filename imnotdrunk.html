@@ -138,20 +138,24 @@
               </div>
             </div>
           </div>
+
+          <!-- Action Buttons ON the card -->
+          <div class="card-actions-on-card">
+            <button type="button" class="btn-on-card btn-survive-card" onclick="event.stopPropagation(); handleSurvive()">
+              ✅ รอด!
+            </button>
+            <button type="button" class="btn-on-card btn-drink-card" onclick="event.stopPropagation(); handleDrink()">
+              🍺 ดื่ม!
+            </button>
+          </div>
         </div>
       </div>
     </div>
 
-    <!-- Action Controls -->
-    <div class="game-actions">
-      <button type="button" class="btn-action btn-survive" onclick="handleSurvive()">
-        ✅ ทำสำเร็จ (รอด!)
-      </button>
-      <button type="button" class="btn-action btn-drink" onclick="handleDrink()">
-        🍺 ไม่ทำ (ยอมดื่ม)
-      </button>
+    <!-- Next Card Button (outside card, below) -->
+    <div class="next-card-row">
       <button type="button" class="btn-action btn-next-card" onclick="handleNextCard()">
-        ➡️ การ์ดใบถัดไป (Next)
+        ➡️ การ์ดใบถัดไป
       </button>
     </div>
 

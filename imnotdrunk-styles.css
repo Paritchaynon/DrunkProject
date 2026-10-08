@@ -441,10 +441,10 @@ body {
 /* Card 3D Flip Scene */
 .card-scene {
   width: 100%;
-  height: 480px;
+  height: 520px;
   perspective: 1200px;
   -webkit-perspective: 1200px;
-  margin-bottom: 24px;
+  margin-bottom: 16px;
   position: relative;
 }
 
@@ -682,12 +682,79 @@ body {
   margin-bottom: 2px;
 }
 
-/* Action Controls */
+/* Action Controls (legacy, now inside card) */
 .game-actions {
+  display: none; /* hidden — buttons moved into card */
+}
+
+/* Buttons INSIDE card-front (รอด / ดื่ม) */
+.card-actions-on-card {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 12px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 12px;
+  /* ซ่อนก่อนพลิก — แสดงเมื่อพลิกแล้วผ่าน JS */
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease 0.35s; /* รอ flip animation เสร็จก่อน */
+}
+
+/* เมื่อการ์ดพลิกแล้ว ให้ปุ่มปรากฏ */
+.flip-card.is-flipped .card-actions-on-card {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.btn-on-card {
+  border: none;
+  padding: 13px 10px;
+  border-radius: 14px;
+  font-family: var(--font-family);
+  font-size: 1rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.18s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  letter-spacing: 0.3px;
+}
+
+.btn-survive-card {
+  background: linear-gradient(135deg, #059669, #10b981);
+  color: #fff;
+  box-shadow: 0 5px 16px rgba(16, 185, 129, 0.4);
+}
+
+.btn-survive-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(16, 185, 129, 0.6);
+}
+
+.btn-survive-card:active {
+  transform: scale(0.96);
+}
+
+.btn-drink-card {
+  background: linear-gradient(135deg, #e11d48, #f43f5e);
+  color: #fff;
+  box-shadow: 0 5px 16px rgba(244, 63, 94, 0.4);
+}
+
+.btn-drink-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 22px rgba(244, 63, 94, 0.6);
+}
+
+.btn-drink-card:active {
+  transform: scale(0.96);
+}
+
+/* Next Card row (ใต้การ์ด) */
+.next-card-row {
+  margin-top: 4px;
+  margin-bottom: 4px;
 }
 
 .btn-action {
@@ -728,12 +795,12 @@ body {
 }
 
 .btn-next-card {
-  grid-column: span 2;
+  width: 100%;
   background: linear-gradient(135deg, #4f46e5, #7c3aed);
   color: #fff;
   box-shadow: 0 6px 20px rgba(124, 58, 237, 0.35);
-  font-size: 1.1rem;
-  padding: 16px;
+  font-size: 1.05rem;
+  padding: 15px 20px;
 }
 
 .btn-next-card:hover {
@@ -855,16 +922,20 @@ body {
 /* Responsive adjustments */
 @media (max-width: 480px) {
   .card-scene {
-    height: 440px;
+    height: 490px;
   }
   .card-headline {
-    font-size: 1.3rem;
+    font-size: 1.25rem;
   }
   .card-instruction {
-    font-size: 1.05rem;
+    font-size: 1rem;
   }
   .party-panel {
     padding: 24px 18px;
+  }
+  .btn-on-card {
+    font-size: 0.9rem;
+    padding: 11px 8px;
   }
 }
 

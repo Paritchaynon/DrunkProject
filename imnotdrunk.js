@@ -380,10 +380,7 @@ function updateTally() {
 
 // --- Action Handlers (Survive / Drink / Next) ---
 function handleSurvive() {
-  if (!state.isFlipped) {
-    flipCurrentCard();
-    return;
-  }
+  if (!state.isFlipped) return; // safety guard (CSS ซ่อนปุ่มไว้แล้ว โดย pointer-events)
 
   if (state.hasDecidedCurrentCard) {
     showToast('ตัดสินการ์ดใบนี้ไปแล้ว!');
@@ -412,10 +409,7 @@ function handleSurvive() {
 }
 
 function handleDrink() {
-  if (!state.isFlipped) {
-    flipCurrentCard();
-    return;
-  }
+  if (!state.isFlipped) return; // safety guard
 
   if (state.hasDecidedCurrentCard) {
     showToast('ตัดสินการ์ดใบนี้ไปแล้ว!');
