@@ -592,6 +592,8 @@ body {
 .card-front.theme-spicy { border-color: var(--neon-pink); box-shadow: 0 0 35px rgba(255, 42, 133, 0.4); }
 .card-front.theme-minigame { border-color: #ff7b00; box-shadow: 0 0 35px rgba(255, 123, 0, 0.3); }
 .card-front.theme-music { border-color: #d946ef; box-shadow: 0 0 35px rgba(217, 70, 239, 0.4); }
+.card-front.theme-music_guess { border-color: #38bdf8; box-shadow: 0 0 35px rgba(56, 189, 248, 0.4); }
+.card-front.theme-music_karaoke { border-color: #ec4899; box-shadow: 0 0 35px rgba(236, 72, 153, 0.45); }
 
 .card-top-bar {
   display: flex;
